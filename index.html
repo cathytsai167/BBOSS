@@ -68,7 +68,7 @@ async function load(){
   (data||[]).forEach(r=>{if(!latest[r.m2]) latest[r.m2]=r});
   merged=cfg.m2Rows.map(base=>{
     const r=latest[base.name];
-    return {...base,rep67:r?Number(r.repurchase_67):0,dist8:r?Number(r.distribution_8):0,rep8:r?Number(r.repurchase_8):0,submitted:!!r,created_at:r?r.created_at:null}
+    return {...base,rep67:r?Number(r.repurchase_67):Number(base.rep67Initial||0),dist8:r?Number(r.distribution_8):Number(base.dist8Initial||0),rep8:r?Number(r.repurchase_8):Number(base.rep8Initial||0),submitted:!!r,created_at:r?r.created_at:null}
   });
   render();
 }
