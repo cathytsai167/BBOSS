@@ -118,9 +118,9 @@ function render(){
   const target8=merged.reduce((a,x)=>a+x.target8,0);
   const dist8=merged.reduce((a,x)=>a+x.dist8,0);
   const rep8=merged.reduce((a,x)=>a+x.rep8,0);
-  const totalDist=base67+dist8, totalRep=rep67+rep8;
+  const totalDist=merged.reduce((a,x)=>a+displayTotalDist(x),0), totalRep=rep67+rep8;
   document.getElementById('totalDist').textContent=fmt(totalDist);
-  document.getElementById('totalFormula').textContent=`6–7月 ${fmt(base67)} + 8月新增 ${fmt(dist8)}`;
+  document.getElementById('totalFormula').textContent='';
   document.getElementById('cumRep').textContent=pct(totalRep,totalDist);
   document.getElementById('cumRepNote').textContent=`累计复购 ${fmt(totalRep)} / 累计铺货 ${fmt(totalDist)}`;
 
@@ -155,7 +155,7 @@ function render(){
   document.getElementById('m3grid').innerHTML=m3Names.map(m3=>{
     const xs=merged.filter(x=>x.m3===m3);
     const b=xs.reduce((a,x)=>a+x.base67,0),r=xs.reduce((a,x)=>a+x.rep67,0),t=xs.reduce((a,x)=>a+x.target8,0),d=xs.reduce((a,x)=>a+x.dist8,0),r8=xs.reduce((a,x)=>a+x.rep8,0);
-    return `<div class="m3"><div class="m3head">${m3}<span style="float:right;color:#6d7788;font-size:12px">累计 ${fmt(b+d)}</span></div><div class="split">
+    return `<div class="m3"><div class="m3head">${m3}<span style="float:right;color:#6d7788;font-size:12px">累计 ${fmt(m3==='肖锡龙'?d:b+d)}</span></div><div class="split">
       <div class="block"><div class="tag">6–7月</div><div class="row"><span>铺货</span><b>${fmt(b)}</b></div><div class="row"><span>复购</span><b>${fmt(r)}</b></div><div class="row"><span>复购率</span><b>${pct(r,b)}</b></div><div class="bar" style="margin:5px 0 0"><div class="fill67" style="width:${Math.min((r/b||0)*100,100)}%"></div></div></div>
       <div class="block"><div class="tag">8月</div><div class="row"><span>目标</span><b>${fmt(t)}</b></div><div class="row"><span>铺货</span><b>${fmt(d)}</b></div><div class="row"><span>铺货进度</span><b>${pct(d,t)}</b></div><div class="bar" style="margin:5px 0 8px"><div class="fill8" style="width:${Math.min((d/t||0)*100,100)}%"></div></div></div>
     </div></div>`;
