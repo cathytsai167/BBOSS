@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>大富豪雪白新品 Tracking Dashboard</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="nav"><div><h1>大富豪雪白新品 Tracking Dashboard</h1><div class="sub">苏东 JSE · 自动读取 M2 最新填报</div></div><a href="submit.html">M2填报入口 →</a></div>
+
+  <div class="hero">
+    <div class="totalgrid">
+      <div class="total"><div class="eyebrow">新品上市以来累计铺货售点</div><div class="big" id="totalDist">—</div><div class="formula" id="totalFormula"></div></div>
+      <div class="total"><div class="eyebrow">累计复购率</div><div class="big" id="cumRep">—</div><div class="formula" id="cumRepNote">含6–7月及8月已复购售点</div></div>
+    </div>
+    <div style="display:grid;gap:14px">
+      <div class="period p67"><h2>6–7月｜存量铺货 & 复购</h2><div class="kpis" id="k67"></div></div>
+      <div class="period p8"><h2>8月｜新增铺货 & 复购</h2><div class="kpis" id="k8"></div></div>
+    </div>
+  </div>
+
+  <div class="section">本周填报状态</div>
+  <div class="panel" style="margin-top:0">
+    <div style="display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+      <div><span class="lab">已提交</span><div class="val" id="submitCount">0 / 20</div></div>
+      <div class="sub" id="refreshTime"></div>
+    </div>
+    <div class="statusgrid" id="statusgrid"></div>
+  </div>
+
+  <div class="section">M3 区域表现</div>
+  <div class="m3grid" id="m3grid"></div>
+
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <strong>M2明细</strong>
+      <select id="filter" style="width:auto"><option value="ALL">全部M3</option></select>
+    </div>
+    <div style="overflow:auto;margin-top:12px">
+      <table>
+        <thead>
+          <tr><th rowspan="2">M3 / M2</th><th colspan="3" class="th67" style="text-align:center">6–7月｜铺货 & 复购</th><th colspan="4" class="th8" style="text-align:center">8月｜新增铺货 & 复购</th><th rowspan="2">累计铺货</th></tr>
+          <tr><th class="th67">铺货</th><th class="th67">复购</th><th class="th67">复购率</th><th class="th8">目标</th><th class="th8">铺货</th><th class="th8">铺货进度</th><th class="th8">复购率</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const cfg=window.XUEBAI_CONFIG;
+const client=supabase.createClient(cfg.supabaseUrl,cfg.supabaseKey);
+const fmt=n=>Number(n||0).toLocaleString('zh-CN');
+const pct=(a,b)=>b?((a/b)*100).toFixed(1)+'%':'—';
+const m3Names=[...new Set(cfg.m2Rows.map(x=>x.m3))];
+const filter=document.getElementById('filter');
+m3Names.forEach(x=>{const o=document.createElement('option');o.value=x;o.textContent=x;filter.appendChild(o)});
+
+let merged=[];
+
+async function load(){
+  const {data,error}=await client.from('xuebai_weekly').select('*').order('created_at',{ascending:false});
+  if(error){document.getElementById('refreshTime').textContent='读取失败：'+error.message;return}
+  const latest={};
+  (data||[]).forEach(r=>{if(!latest[r.m2]) latest[r.m2]=r});
+  merged=cfg.m2Rows.map(base=>{
+    const r=latest[base.name];
+    return {...base,rep67:r?Number(r.repurchase_67):0,dist8:r?Number(r.distribution_8):0,rep8:r?Number(r.repurchase_8):0,submitted:!!r,created_at:r?r.created_at:null}
+  });
+  render();
+}
+
+function render(){
+  const base67=merged.reduce((a,x)=>a+x.base67,0);
+  const rep67=merged.reduce((a,x)=>a+x.rep67,0);
+  const target8=merged.reduce((a,x)=>a+x.target8,0);
+  const dist8=merged.reduce((a,x)=>a+x.dist8,0);
+  const rep8=merged.reduce((a,x)=>a+x.rep8,0);
+  const totalDist=base67+dist8, totalRep=rep67+rep8;
+  document.getElementById('totalDist').textContent=fmt(totalDist);
+  document.getElementById('totalFormula').textContent=`6–7月 ${fmt(base67)} + 8月新增 ${fmt(dist8)}`;
+  document.getElementById('cumRep').textContent=pct(totalRep,totalDist);
+  document.getElementById('cumRepNote').textContent=`累计复购 ${fmt(totalRep)} / 累计铺货 ${fmt(totalDist)}`;
+
+  document.getElementById('k67').innerHTML=[
+    ['已铺货',fmt(base67),'售点'],['已复购',fmt(rep67),'售点'],['复购率',pct(rep67,base67),'6–7月 cohort']
+  ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div></div>`).join('');
+  document.getElementById('k8').innerHTML=[
+    ['目标',fmt(target8),'售点'],['已铺货',fmt(dist8),`进度 ${pct(dist8,target8)}`],['已复购',fmt(rep8),`复购率 ${pct(rep8,dist8)}`]
+  ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div></div>`).join('');
+
+  const done=merged.filter(x=>x.submitted).length;
+  document.getElementById('submitCount').textContent=`${done} / ${merged.length}`;
+  document.getElementById('refreshTime').textContent='页面刷新时间：'+new Date().toLocaleString('zh-CN',{hour12:false});
+  document.getElementById('statusgrid').innerHTML=merged.map(x=>`<div class="statusitem"><span>${x.name}</span><b class="${x.submitted?'done':'todo'}">${x.submitted?'已提交':'未提交'}</b></div>`).join('');
+
+  document.getElementById('m3grid').innerHTML=m3Names.map(m3=>{
+    const xs=merged.filter(x=>x.m3===m3);
+    const b=xs.reduce((a,x)=>a+x.base67,0),r=xs.reduce((a,x)=>a+x.rep67,0),t=xs.reduce((a,x)=>a+x.target8,0),d=xs.reduce((a,x)=>a+x.dist8,0),r8=xs.reduce((a,x)=>a+x.rep8,0);
+    return `<div class="m3"><div class="m3head">${m3}<span style="float:right;color:#6d7788;font-size:12px">累计 ${fmt(b+d)}</span></div><div class="split">
+      <div class="block"><div class="tag">6–7月</div><div class="row"><span>铺货</span><b>${fmt(b)}</b></div><div class="row"><span>复购</span><b>${fmt(r)}</b></div><div class="row"><span>复购率</span><b>${pct(r,b)}</b></div><div class="bar"><div class="fill67" style="width:${Math.min((r/b||0)*100,100)}%"></div></div></div>
+      <div class="block"><div class="tag">8月</div><div class="row"><span>铺货</span><b>${fmt(d)} / ${fmt(t)}</b></div><div class="row"><span>进度</span><b>${pct(d,t)}</b></div><div class="row"><span>复购率</span><b>${pct(r8,d)}</b></div><div class="bar"><div class="fill8" style="width:${Math.min((d/t||0)*100,100)}%"></div></div></div>
+    </div></div>`;
+  }).join('');
+  renderTable();
+}
+
+function renderTable(){
+  const f=filter.value;
+  const rows=f==='ALL'?merged:merged.filter(x=>x.m3===f);
+  document.getElementById('tbody').innerHTML=rows.map(x=>{
+    const r67=x.base67?x.rep67/x.base67:0,p8=x.target8?x.dist8/x.target8:0,r8=x.dist8?x.rep8/x.dist8:0;
+    return `<tr>
+      <td>${x.m3} / ${x.name}</td>
+      <td class="td67">${fmt(x.base67)}</td>
+      <td class="td67">${fmt(x.rep67)}</td>
+      <td class="td67">${pct(x.rep67,x.base67)}<div class="minibar"><div class="miniblue" style="width:${Math.min(r67*100,100)}%"></div></div></td>
+      <td class="td8">${fmt(x.target8)}</td>
+      <td class="td8">${fmt(x.dist8)}</td>
+      <td class="td8">${pct(x.dist8,x.target8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(p8*100,100)}%"></div></div></td>
+      <td class="td8">${pct(x.rep8,x.dist8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(r8*100,100)}%"></div></div></td>
+      <td class="totaltd">${fmt(x.base67+x.dist8)}</td>
+    </tr>`;
+  }).join('');
+}
+filter.addEventListener('change',renderTable);
+load();
+</script>
+</body></html>
