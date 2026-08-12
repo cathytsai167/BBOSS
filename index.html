@@ -52,7 +52,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <div class="section" style="margin-top:26px">今日提报状态 <span class="sub" id="submitCount" style="font-weight:500;margin-left:8px"></span></div>
+  <div class="section" style="margin-top:26px">M2周度更新状态 <span class="sub" id="submitCount" style="font-weight:500;margin-left:8px"></span></div>
   <div class="m3grid" id="statusByM3"></div>
   <div class="sub" id="refreshTime" style="text-align:right;margin-top:8px"></div>
 
@@ -131,21 +131,21 @@ function render(){
     ['目标',fmt(target8),'售点'],['已铺货',fmt(dist8),'售点'],['铺货进度',pct(dist8,target8),`目标 ${fmt(target8)}`]
   ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div></div>`).join('');
 
-  const doneToday=merged.filter(x=>isToday(x.created_at)).length;
-  document.getElementById('submitCount').textContent=`苏东 TTL：${doneToday}/${merged.length} 今日已更新`;
+  const done=merged.filter(x=>x.submitted).length;
+  document.getElementById('submitCount').textContent=`苏东 TTL：${done}/${merged.length} 已更新`;
   document.getElementById('refreshTime').textContent='页面刷新时间：'+new Date().toLocaleString('zh-CN',{hour12:false});
   document.getElementById('statusByM3').innerHTML=m3Names.map(m3=>{
     const xs=merged.filter(x=>x.m3===m3);
-    const d=xs.filter(x=>isToday(x.created_at)).length;
+    const d=xs.filter(x=>x.submitted).length;
     return `<div class="m3" style="padding:14px">
-      <div class="m3head" style="margin-bottom:8px">${m3}<span style="float:right;font-size:13px;color:#6d7788">${d}/${xs.length} 今日已更新</span></div>
+      <div class="m3head" style="margin-bottom:8px">${m3}<span style="float:right;font-size:13px;color:#6d7788">${d}/${xs.length} 已更新</span></div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         ${xs.map(x=>{
-          const today=isToday(x.created_at);
-          return `<span style="font-size:12px;padding:4px 7px;border-radius:8px;background:${today?'#eef8f1':'#fff1f1'}">
+          const updated=x.submitted;
+          return `<span style="font-size:12px;padding:4px 7px;border-radius:8px;background:${updated?'#eef8f1':'#fff1f1'}">
             <span>${x.name}</span>
-            <b class="${today?'today':'stale'}">${today?'今日已更新':'今日未更新'}</b>
-            <span class="timechip">${shortTime(x.created_at)}</span>
+            <b class="${updated?'today':'stale'}">${updated?'已更新':'待更新'}</b>
+            <span class="timechip">${updated?shortTime(x.created_at):'暂无更新'}</span>
           </span>`;
         }).join('')}
       </div>
