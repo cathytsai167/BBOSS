@@ -124,7 +124,7 @@ function render(){
   document.getElementById('totalDist').textContent=fmt(totalDist);
   document.getElementById('totalFormula').textContent=`6–7月 ${fmt(base67)} ｜ 8月新增 ${fmt(dist8)}`;
   document.getElementById('cumRep').textContent=pct(totalRep,totalDist);
-  document.getElementById('cumRepNote').textContent='';
+  document.getElementById('cumRepNote').textContent=`累计复购 ${fmt(totalRep)} 家`;
 
   document.getElementById('k67').innerHTML=[
     ['已铺货',fmt(base67),'售点'],['已复购',fmt(rep67),'售点'],['复购率',pct(rep67,base67),'6–7月累计']
