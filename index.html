@@ -42,8 +42,8 @@
     <div style="overflow:auto;margin-top:12px">
       <table>
         <thead>
-          <tr><th rowspan="2">M3 / M2</th><th colspan="3" class="th67" style="text-align:center">6–7月｜铺货 & 复购</th><th colspan="4" class="th8" style="text-align:center">8月｜新增铺货 & 复购</th><th rowspan="2">累计铺货</th></tr>
-          <tr><th class="th67">铺货</th><th class="th67">复购</th><th class="th67">复购率</th><th class="th8">目标</th><th class="th8">铺货</th><th class="th8">铺货进度</th><th class="th8">复购率</th></tr>
+          <tr><th rowspan="2">M3 / M2</th><th colspan="3" class="th67" style="text-align:center">6–7月｜铺货 & 复购</th><th colspan="5" class="th8" style="text-align:center">8月｜新增铺货 & 复购</th><th rowspan="2">累计铺货</th></tr>
+          <tr><th class="th67">铺货</th><th class="th67">复购</th><th class="th67">复购率</th><th class="th8">目标</th><th class="th8">铺货</th><th class="th8">铺货进度</th><th class="th8">复购</th><th class="th8">复购率</th></tr>
         </thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -52,7 +52,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <div class="section" style="margin-top:26px">M2周度更新状态 <span class="sub" id="submitCount" style="font-weight:500;margin-left:8px"></span></div>
+  <div class="section" style="margin-top:26px">今日提报状态 <span class="sub" id="submitCount" style="font-weight:500;margin-left:8px"></span></div>
   <div class="m3grid" id="statusByM3"></div>
   <div class="sub" id="refreshTime" style="text-align:right;margin-top:8px"></div>
 
@@ -60,14 +60,14 @@
 const cfg={
   supabaseUrl:"https://hjuemoaxwotvgvppuits.supabase.co",
   supabaseKey:"sb_publishable_kLCQcltuyPsjoM5udpUu4A_8iw1R-oD",
-  m2Rows:[{"m3": "丁点", "name": "黄新军&许艳", "base67": 805, "rep67Initial": 87, "target8": 500, "dist8Initial": 105, "rep8Initial": 0}, {"m3": "丁点", "name": "谢国峰", "base67": 605, "rep67Initial": 61, "target8": 400, "dist8Initial": 132, "rep8Initial": 0}, {"m3": "杨晓超", "name": "蔡芳", "base67": 302, "rep67Initial": 48, "target8": 208, "dist8Initial": 30, "rep8Initial": 0}, {"m3": "杨晓超", "name": "季红州", "base67": 430, "rep67Initial": 72, "target8": 220, "dist8Initial": 42, "rep8Initial": 0}, {"m3": "杨晓超", "name": "梅宇飞", "base67": 152, "rep67Initial": 22, "target8": 110, "dist8Initial": 21, "rep8Initial": 0}, {"m3": "杨晓超", "name": "高凌峰", "base67": 313, "rep67Initial": 56, "target8": 240, "dist8Initial": 50, "rep8Initial": 0}, {"m3": "孟祥杰", "name": "陈永华", "base67": 643, "rep67Initial": 65, "target8": 320, "dist8Initial": 78, "rep8Initial": 0}, {"m3": "孟祥杰", "name": "杭佳琪", "base67": 505, "rep67Initial": 29, "target8": 275, "dist8Initial": 39, "rep8Initial": 0}, {"m3": "孟祥杰", "name": "茅东标", "base67": 276, "rep67Initial": 28, "target8": 100, "dist8Initial": 19, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "是焱彬-姜堰", "base67": 38, "rep67Initial": 1, "target8": 200, "dist8Initial": 45, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "是焱彬-靖江", "base67": 111, "rep67Initial": 0, "target8": 200, "dist8Initial": 114, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "王震-泰兴", "base67": 86, "rep67Initial": 4, "target8": 150, "dist8Initial": 51, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "王震-泰州", "base67": 15, "rep67Initial": 0, "target8": 70, "dist8Initial": 6, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "张雷", "base67": 34, "rep67Initial": 6, "target8": 200, "dist8Initial": 31, "rep8Initial": 0}, {"m3": "杨军", "name": "费燕锋", "base67": 70, "rep67Initial": 0, "target8": 200, "dist8Initial": 24, "rep8Initial": 0}, {"m3": "杨军", "name": "顾彬", "base67": 117, "rep67Initial": 1, "target8": 200, "dist8Initial": 31, "rep8Initial": 0}, {"m3": "杨军", "name": "李海伟", "base67": 89, "rep67Initial": 5, "target8": 260, "dist8Initial": 35, "rep8Initial": 0}, {"m3": "杨军", "name": "刘洲", "base67": 51, "rep67Initial": 0, "target8": 200, "dist8Initial": 30, "rep8Initial": 0}, {"m3": "杨军", "name": "唐启军", "base67": 61, "rep67Initial": 1, "target8": 150, "dist8Initial": 21, "rep8Initial": 0}, {"m3": "杨军", "name": "张旭东", "base67": 68, "rep67Initial": 2, "target8": 200, "dist8Initial": 26, "rep8Initial": 0}]
+  m2Rows:[{"m3": "丁点", "name": "黄新军&许艳", "base67": 805, "rep67Initial": 87, "target8": 500, "dist8Initial": 105, "rep8Initial": 0}, {"m3": "丁点", "name": "谢国峰", "base67": 605, "rep67Initial": 61, "target8": 400, "dist8Initial": 132, "rep8Initial": 0}, {"m3": "杨晓超", "name": "蔡芳", "base67": 302, "rep67Initial": 48, "target8": 208, "dist8Initial": 30, "rep8Initial": 0}, {"m3": "杨晓超", "name": "季红州", "base67": 430, "rep67Initial": 72, "target8": 220, "dist8Initial": 42, "rep8Initial": 0}, {"m3": "杨晓超", "name": "梅宇飞", "base67": 152, "rep67Initial": 22, "target8": 110, "dist8Initial": 21, "rep8Initial": 0}, {"m3": "杨晓超", "name": "高凌峰", "base67": 313, "rep67Initial": 56, "target8": 240, "dist8Initial": 50, "rep8Initial": 0}, {"m3": "孟祥杰", "name": "陈永华", "base67": 643, "rep67Initial": 65, "target8": 320, "dist8Initial": 78, "rep8Initial": 0}, {"m3": "孟祥杰", "name": "杭佳琪", "base67": 505, "rep67Initial": 29, "target8": 275, "dist8Initial": 39, "rep8Initial": 0}, {"m3": "孟祥杰", "name": "茅东标", "base67": 276, "rep67Initial": 28, "target8": 100, "dist8Initial": 19, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "是焱彬-姜堰", "base67": 38, "rep67Initial": 1, "target8": 200, "dist8Initial": 45, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "是焱彬-靖江", "base67": 111, "rep67Initial": 0, "target8": 226, "dist8Initial": 114, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "王震-泰兴", "base67": 86, "rep67Initial": 4, "target8": 150, "dist8Initial": 51, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "王震-泰州", "base67": 15, "rep67Initial": 0, "target8": 70, "dist8Initial": 6, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "张雷", "base67": 34, "rep67Initial": 6, "target8": 200, "dist8Initial": 31, "rep8Initial": 0}, {"m3": "杨军", "name": "费燕锋", "base67": 70, "rep67Initial": 0, "target8": 200, "dist8Initial": 24, "rep8Initial": 0}, {"m3": "杨军", "name": "顾彬", "base67": 117, "rep67Initial": 1, "target8": 200, "dist8Initial": 31, "rep8Initial": 0}, {"m3": "杨军", "name": "李海伟", "base67": 89, "rep67Initial": 5, "target8": 260, "dist8Initial": 35, "rep8Initial": 0}, {"m3": "杨军", "name": "刘洲", "base67": 51, "rep67Initial": 0, "target8": 200, "dist8Initial": 30, "rep8Initial": 0}, {"m3": "杨军", "name": "唐启军", "base67": 61, "rep67Initial": 1, "target8": 150, "dist8Initial": 21, "rep8Initial": 0}, {"m3": "杨军", "name": "张旭东", "base67": 68, "rep67Initial": 2, "target8": 200, "dist8Initial": 26, "rep8Initial": 0}]
 };
 const client=supabase.createClient(cfg.supabaseUrl,cfg.supabaseKey);
 const fmt=n=>Number(n||0).toLocaleString('zh-CN');
 const pct=(a,b)=>b?((a/b)*100).toFixed(1)+'%':'—';
 const displayTotalDist=(x)=>{
-  // 肖锡龙区域：累计铺货口径=8月铺货；其他区域=6-7月+8月铺货
-  return x.m3==='肖锡龙' ? Number(x.dist8||0) : Number(x.base67||0)+Number(x.dist8||0);
+  // 累计铺货口径统一=6-7月铺货+8月铺货
+  return Number(x.base67||0)+Number(x.dist8||0);
 };
 const augDisplayDist=(x)=>{
   // 8月铺货展示实际提报数，不做6-7月累加
@@ -131,21 +131,21 @@ function render(){
     ['目标',fmt(target8),'售点'],['已铺货',fmt(dist8),'售点'],['铺货进度',pct(dist8,target8),`目标 ${fmt(target8)}`]
   ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div></div>`).join('');
 
-  const done=merged.filter(x=>x.submitted).length;
-  document.getElementById('submitCount').textContent=`苏东 TTL：${done}/${merged.length} 已更新`;
+  const doneToday=merged.filter(x=>isToday(x.created_at)).length;
+  document.getElementById('submitCount').textContent=`苏东 TTL：${doneToday}/${merged.length} 今日已更新`;
   document.getElementById('refreshTime').textContent='页面刷新时间：'+new Date().toLocaleString('zh-CN',{hour12:false});
   document.getElementById('statusByM3').innerHTML=m3Names.map(m3=>{
     const xs=merged.filter(x=>x.m3===m3);
-    const d=xs.filter(x=>x.submitted).length;
+    const d=xs.filter(x=>isToday(x.created_at)).length;
     return `<div class="m3" style="padding:14px">
-      <div class="m3head" style="margin-bottom:8px">${m3}<span style="float:right;font-size:13px;color:#6d7788">${d}/${xs.length} 已更新</span></div>
+      <div class="m3head" style="margin-bottom:8px">${m3}<span style="float:right;font-size:13px;color:#6d7788">${d}/${xs.length} 今日已更新</span></div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         ${xs.map(x=>{
-          const updated=x.submitted;
-          return `<span style="font-size:12px;padding:4px 7px;border-radius:8px;background:${updated?'#eef8f1':'#fff1f1'}">
+          const today=isToday(x.created_at);
+          return `<span style="font-size:12px;padding:4px 7px;border-radius:8px;background:${today?'#eef8f1':'#fff1f1'}">
             <span>${x.name}</span>
-            <b class="${updated?'today':'stale'}">${updated?'已更新':'待更新'}</b>
-            <span class="timechip">${updated?shortTime(x.created_at):'暂无更新'}</span>
+            <b class="${today?'today':'stale'}">${today?'今日已更新':'今日未更新'}</b>
+            <span class="timechip">${shortTime(x.created_at)}</span>
           </span>`;
         }).join('')}
       </div>
@@ -155,7 +155,7 @@ function render(){
   document.getElementById('m3grid').innerHTML=m3Names.map(m3=>{
     const xs=merged.filter(x=>x.m3===m3);
     const b=xs.reduce((a,x)=>a+x.base67,0),r=xs.reduce((a,x)=>a+x.rep67,0),t=xs.reduce((a,x)=>a+x.target8,0),d=xs.reduce((a,x)=>a+x.dist8,0),r8=xs.reduce((a,x)=>a+x.rep8,0);
-    return `<div class="m3"><div class="m3head">${m3}<span style="float:right;color:#6d7788;font-size:12px">累计 ${fmt(m3==='肖锡龙'?d:b+d)}</span></div><div class="split">
+    return `<div class="m3"><div class="m3head">${m3}<span style="float:right;color:#6d7788;font-size:12px">累计 ${fmt(b+d)}</span></div><div class="split">
       <div class="block"><div class="tag">6–7月</div><div class="row"><span>铺货</span><b>${fmt(b)}</b></div><div class="row"><span>复购</span><b>${fmt(r)}</b></div><div class="row"><span>复购率</span><b>${pct(r,b)}</b></div><div class="bar" style="margin:5px 0 0"><div class="fill67" style="width:${Math.min((r/b||0)*100,100)}%"></div></div></div>
       <div class="block"><div class="tag">8月</div><div class="row"><span>目标</span><b>${fmt(t)}</b></div><div class="row"><span>铺货</span><b>${fmt(d)}</b></div><div class="row"><span>铺货进度</span><b>${pct(d,t)}</b></div><div class="bar" style="margin:5px 0 8px"><div class="fill8" style="width:${Math.min((d/t||0)*100,100)}%"></div></div></div>
     </div></div>`;
@@ -187,6 +187,7 @@ function renderTable(){
       <td class="td8">${fmt(x.target8)}</td>
       <td class="td8">${fmt(augDisplayDist(x))}</td>
       <td class="td8">${pct(augDisplayDist(x),x.target8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(p8*100,100)}%"></div></div></td>
+      <td class="td8">${fmt(x.rep8)}</td>
       <td class="td8">${pct(x.rep8,x.dist8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(r8*100,100)}%"></div></div></td>
       <td class="totaltd">${fmt(displayTotalDist(x))}</td>
     </tr>`;
