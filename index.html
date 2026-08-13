@@ -30,6 +30,8 @@
         <select id="filter" style="width:auto"><option value="ALL">全部M3</option></select>
         <select id="sort" style="width:auto">
           <option value="default">默认顺序</option>
+          <option value="total_desc">累计铺货：高 → 低</option>
+          <option value="total_asc">累计铺货：低 → 高</option>
           <option value="p8_desc">8月铺货进度：高 → 低</option>
           <option value="p8_asc">8月铺货进度：低 → 高</option>
           <option value="r67_desc">6–7月复购率：高 → 低</option>
@@ -120,7 +122,7 @@ function render(){
   const rep8=merged.reduce((a,x)=>a+x.rep8,0);
   const totalDist=merged.reduce((a,x)=>a+displayTotalDist(x),0), totalRep=rep67+rep8;
   document.getElementById('totalDist').textContent=fmt(totalDist);
-  document.getElementById('totalFormula').textContent=`6–7月铺货 ${fmt(base67)} + 8月已铺货 ${fmt(dist8)}`;
+  document.getElementById('totalFormula').textContent=`6–7月 ${fmt(base67)} ｜ 8月新增 ${fmt(dist8)}`;
   document.getElementById('cumRep').textContent=pct(totalRep,totalDist);
   document.getElementById('cumRepNote').textContent='';
 
@@ -169,6 +171,7 @@ function renderTable(){
   const s=sort.value;
   const rate=(x,type)=>{
     if(type==='p8') return x.target8?x.dist8/x.target8:0;
+    if(type==='total') return Number(displayTotalDist(x));
     if(type==='r67') return x.base67?x.rep67/x.base67:0;
     if(type==='r8') return x.dist8?x.rep8/x.dist8:0;
     return 0;
@@ -186,7 +189,7 @@ function renderTable(){
       <td class="td67">${pct(x.rep67,x.base67)}<div class="minibar"><div class="miniblue" style="width:${Math.min(r67*100,100)}%"></div></div></td>
       <td class="td8">${fmt(x.target8)}</td>
       <td class="td8">${fmt(augDisplayDist(x))}</td>
-      <td class="td8">${pct(augDisplayDist(x),x.target8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(p8*100,100)}%"></div></div></td>
+      <td class="td8">${pct(augDisplayDist(x),x.target8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(p8*100,100)}%;opacity:${p8>=0.5?1:(p8>=0.2?0.75:0.45)}"></div></div></td>
       <td class="td8">${fmt(x.rep8)}</td>
       <td class="td8">${pct(x.rep8,x.dist8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(r8*100,100)}%"></div></div></td>
       <td class="totaltd">${fmt(displayTotalDist(x))}</td>
