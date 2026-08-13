@@ -12,7 +12,7 @@
   <div class="hero">
     <div class="totalgrid">
       <div class="total"><div class="eyebrow">新品上市以来累计铺货售点</div><div class="big" id="totalDist">—</div><div class="formula" id="totalFormula"></div></div>
-      <div class="total"><div class="eyebrow">累计复购率</div><div class="big" id="cumRep">—</div><div class="formula" id="cumRepNote">含6–7月及8月已复购售点</div></div>
+      <div class="total"><div class="eyebrow">累计复购率</div><div class="big" id="cumRep">—</div><div class="formula" id="cumRepNote"></div></div>
     </div>
     <div style="display:grid;gap:14px">
       <div class="period p67"><h2>6–7月｜存量铺货 & 复购</h2><div class="kpis" id="k67"></div></div>
@@ -125,10 +125,10 @@ function render(){
   document.getElementById('cumRepNote').textContent=`累计复购 ${fmt(totalRep)} / 累计铺货 ${fmt(totalDist)}`;
 
   document.getElementById('k67').innerHTML=[
-    ['已铺货',fmt(base67),'售点'],['已复购',fmt(rep67),'售点'],['复购率',pct(rep67,base67),'6–7月 cohort']
+    ['已铺货',fmt(base67),'售点'],['已复购',fmt(rep67),'售点'],['复购率',pct(rep67,base67),'6–7月累计']
   ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div></div>`).join('');
   document.getElementById('k8').innerHTML=[
-    ['目标',fmt(target8),'售点'],['已铺货',fmt(dist8),'售点'],['铺货进度',pct(dist8,target8),`目标 ${fmt(target8)}`]
+    ['目标',fmt(target8),'售点'],['已铺货',fmt(dist8),'售点'],['铺货进度',pct(dist8,target8),'8月新增']
   ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div></div>`).join('');
 
   const doneToday=merged.filter(x=>isToday(x.created_at)).length;
@@ -187,6 +187,7 @@ function renderTable(){
       <td class="td8">${fmt(x.target8)}</td>
       <td class="td8">${fmt(augDisplayDist(x))}</td>
       <td class="td8">${pct(augDisplayDist(x),x.target8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(p8*100,100)}%"></div></div></td>
+      <td class="td8">${fmt(x.rep8)}</td>
       <td class="td8">${fmt(x.rep8)}</td>
       <td class="td8">${pct(x.rep8,x.dist8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(r8*100,100)}%"></div></div></td>
       <td class="totaltd">${fmt(displayTotalDist(x))}</td>
