@@ -7,7 +7,7 @@
 </head>
 <body>
 <div class="wrap" style="max-width:720px">
-  <div class="nav"><div><h1>大富豪雪白周度填报</h1><div class="sub">请填写截至当前的累计数据（非本周新增）</div></div><a href="index.html">查看 Dashboard</a></div>
+  <div class="nav"><div><h1>大富豪雪白周度填报</h1><div class="sub">请填写截至当前的累计数据（非本周新增）</div></div></div>
   <div class="card" style="padding:18px">
     <div class="field"><label for="m2">M2</label><select id="m2"><option value="">请选择M2</option></select></div>
     <div class="field"><label for="rep67">6–7月已铺货售点中，累计已复购售点数</label><input id="rep67" type="number" min="0" step="1" inputmode="numeric"><div class="hint">截至当前累计已复购售点数，非本周新增。</div></div>
@@ -36,7 +36,7 @@ document.getElementById('submitBtn').addEventListener('click',async()=>{
   const {error}=await client.from('xuebai_weekly').insert({m2:m2.value,repurchase_67:rep67,distribution_8:dist8,repurchase_8:rep8});
   btn.disabled=false;btn.textContent='提交本周数据';
   if(error){msg('提交失败：'+error.message,'err');return}
-  msg('提交成功，Dashboard 已可读取本次数据。','ok');
+  msg('提交成功，感谢更新。','ok');
 });
 </script>
 </body></html>
