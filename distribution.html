@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>雪白听铺货追踪</title>
+<link rel="stylesheet" href="styles.css?v=20260811-4">
+<style>
+  .auth-gate{max-width:420px;margin:12vh auto;padding:24px;border-radius:16px;background:#fff;box-shadow:0 12px 36px rgba(25,40,70,.12)}
+  .auth-gate h1{margin:0 0 8px;font-size:24px}.auth-gate p{margin:0 0 18px;color:#6d7788}
+  .auth-gate label{display:block;margin:12px 0 6px;font-weight:700}
+  .auth-gate input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #d9dee8;border-radius:10px;font-size:16px}
+  .auth-gate button{width:100%;margin-top:18px;padding:12px;border:0;border-radius:10px;background:#194f90;color:#fff;font-size:16px;font-weight:700}
+  .auth-gate button:disabled{opacity:.6}.auth-msg{min-height:22px;margin-top:10px;color:#c0392b;font-size:13px}
+  .logout-btn{border:1px solid #d9dee8;border-radius:9px;background:#fff;padding:8px 12px;color:#344054;cursor:pointer}
+  body.is-locked>:not(#authGate):not(script){display:none!important}
+</style>
+</head>
+<body class="is-locked">
+<div id="authGate" class="auth-gate">
+  <h1>Dashboard 登录</h1>
+  <p>仅限管理员查看完整数据</p>
+  <label for="loginEmail">邮箱</label>
+  <input id="loginEmail" type="email" autocomplete="username" placeholder="请输入管理员邮箱">
+  <label for="loginPassword">密码</label>
+  <input id="loginPassword" type="password" autocomplete="current-password" placeholder="请输入密码">
+  <button id="loginBtn" type="button">登录查看</button>
+  <div id="loginMsg" class="auth-msg" aria-live="polite"></div>
+</div>
+<div class="wrap">
+  <div class="nav"><div><h1>雪白听铺货追踪</h1><div class="sub">苏东 JSE · 自动读取 M2 最新填报</div></div><button id="logoutBtn" class="logout-btn" type="button">退出登录</button></div>
+
+  <div class="hero">
+    <div class="totalgrid">
+      <div class="total"><div class="eyebrow">新品上市以来累计铺货售点</div><div class="big" id="totalDist">—</div><div class="formula" id="totalFormula"></div></div>
+      <div class="total"><div class="eyebrow">累计复购率</div><div class="big" id="cumRep">—</div><div class="formula" id="cumRepNote"></div></div>
+    </div>
+    <div style="display:grid;gap:14px">
+      <div class="period p67"><h2>6–7月｜存量铺货 & 复购</h2><div class="kpis" id="k67"></div></div>
+      <div class="period p8"><h2>8月｜新增铺货 & 复购</h2><div class="kpis" id="k8"></div></div>
+    </div>
+  </div>
+
+  <div class="section">M3 区域表现</div>
+  <div class="m3grid" id="m3grid"></div>
+
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <strong>M2明细</strong>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <label style="font-size:13px;color:#6d7788">筛选标准：<select id="filter" style="width:auto"><option value="ALL">全部M3</option></select></label>
+        <label style="font-size:13px;color:#6d7788">排序标准：<select id="sort" style="width:auto"><option value="default">默认顺序</option><option value="total">累计铺货</option><option value="p8">8月铺货进度</option><option value="r67">6–7月复购率</option><option value="r8">8月复购率</option></select></label>
+        <label style="font-size:13px;color:#6d7788">顺序标准：<select id="sortDir" style="width:auto"><option value="desc">高 → 低</option><option value="asc">低 → 高</option></select></label>
+      </div>
+    </div>
+    <div style="overflow:auto;margin-top:12px">
+      <table>
+        <thead>
+          <tr><th rowspan="2">M3 / M2</th><th colspan="3" class="th67" style="text-align:center">6–7月｜铺货 & 复购</th><th colspan="5" class="th8" style="text-align:center">8月｜新增铺货 & 复购</th><th rowspan="2">累计铺货</th></tr>
+          <tr><th class="th67">铺货</th><th class="th67">复购</th><th class="th67">复购率</th><th class="th8">目标</th><th class="th8">铺货</th><th class="th8">铺货进度</th><th class="th8">复购</th><th class="th8">复购率</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <div class="section" style="margin-top:26px">M2周度更新状态 <span class="sub" id="submitCount" style="font-weight:500;margin-left:8px"></span></div>
+  <div class="m3grid" id="statusByM3"></div>
+  <div class="sub" id="refreshTime" style="text-align:right;margin-top:8px"></div>
+
+<script>
+const cfg={
+  supabaseUrl:"https://hjuemoaxwotvgvppuits.supabase.co",
+  supabaseKey:"sb_publishable_kLCQcltuyPsjoM5udpUu4A_8iw1R-oD",
+  m2Rows:[{"m3": "丁点", "name": "黄新军&许艳", "base67": 805, "rep67Initial": 87, "target8": 500, "dist8Initial": 105, "rep8Initial": 0}, {"m3": "丁点", "name": "谢国峰", "base67": 605, "rep67Initial": 61, "target8": 400, "dist8Initial": 132, "rep8Initial": 0}, {"m3": "杨晓超", "name": "蔡芳", "base67": 302, "rep67Initial": 48, "target8": 208, "dist8Initial": 30, "rep8Initial": 0}, {"m3": "杨晓超", "name": "季红州", "base67": 430, "rep67Initial": 72, "target8": 220, "dist8Initial": 42, "rep8Initial": 0}, {"m3": "杨晓超", "name": "梅宇飞", "base67": 152, "rep67Initial": 22, "target8": 110, "dist8Initial": 21, "rep8Initial": 0}, {"m3": "杨晓超", "name": "高凌峰", "base67": 313, "rep67Initial": 56, "target8": 240, "dist8Initial": 50, "rep8Initial": 0}, {"m3": "孟祥杰", "name": "陈永华", "base67": 643, "rep67Initial": 65, "target8": 320, "dist8Initial": 78, "rep8Initial": 0}, {"m3": "孟祥杰", "name": "杭佳琪", "base67": 505, "rep67Initial": 29, "target8": 275, "dist8Initial": 39, "rep8Initial": 0}, {"m3": "孟祥杰", "name": "茅东标", "base67": 276, "rep67Initial": 28, "target8": 100, "dist8Initial": 19, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "是焱彬-姜堰", "base67": 38, "rep67Initial": 1, "target8": 200, "dist8Initial": 45, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "是焱彬-靖江", "base67": 111, "rep67Initial": 0, "target8": 226, "dist8Initial": 114, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "王震-泰兴", "base67": 86, "rep67Initial": 4, "target8": 150, "dist8Initial": 51, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "王震-泰州", "base67": 15, "rep67Initial": 0, "target8": 70, "dist8Initial": 6, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "张雷", "base67": 34, "rep67Initial": 6, "target8": 200, "dist8Initial": 31, "rep8Initial": 0}, {"m3": "杨军", "name": "费燕锋", "base67": 70, "rep67Initial": 0, "target8": 200, "dist8Initial": 24, "rep8Initial": 0}, {"m3": "杨军", "name": "顾彬", "base67": 117, "rep67Initial": 1, "target8": 200, "dist8Initial": 31, "rep8Initial": 0}, {"m3": "杨军", "name": "李海伟", "base67": 89, "rep67Initial": 5, "target8": 260, "dist8Initial": 35, "rep8Initial": 0}, {"m3": "杨军", "name": "刘洲", "base67": 51, "rep67Initial": 0, "target8": 200, "dist8Initial": 30, "rep8Initial": 0}, {"m3": "杨军", "name": "唐启军", "base67": 61, "rep67Initial": 1, "target8": 150, "dist8Initial": 21, "rep8Initial": 0}, {"m3": "杨军", "name": "张旭东", "base67": 68, "rep67Initial": 2, "target8": 200, "dist8Initial": 26, "rep8Initial": 0}]
+};
+const client=supabase.createClient(cfg.supabaseUrl,cfg.supabaseKey);
+const fmt=n=>Number(n||0).toLocaleString('zh-CN');
+const pct=(a,b)=>b?((a/b)*100).toFixed(1)+'%':'—';
+const displayTotalDist=(x)=>{
+  // 累计铺货口径统一=6-7月铺货+8月铺货
+  return Number(x.base67||0)+Number(x.dist8||0);
+};
+const augDisplayDist=(x)=>{
+  // 8月铺货展示实际提报数，不做6-7月累加
+  return Number(x.dist8||0);
+};
+const augProgress=(x)=>{
+  return x.target8 ? augDisplayDist(x)/x.target8 : 0;
+};
+const isToday=iso=>{
+  if(!iso) return false;
+  const d=new Date(iso), n=new Date();
+  return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate();
+};
+const shortTime=iso=>{
+  if(!iso) return '暂无';
+  const d=new Date(iso);
+  const p=n=>String(n).padStart(2,'0');
+  return `${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+};
+const m3Names=[...new Set(cfg.m2Rows.map(x=>x.m3))];
+const filter=document.getElementById('filter');
+const sort=document.getElementById('sort');
+const sortDir=document.getElementById('sortDir');
+m3Names.forEach(x=>{const o=document.createElement('option');o.value=x;o.textContent=x;filter.appendChild(o)});
+
+let merged=[];
+
+async function load(){
+  const {data,error}=await client.from('xuebai_weekly').select('*').order('created_at',{ascending:false});
+  if(error){document.getElementById('refreshTime').textContent='读取失败：'+error.message;return}
+  const latest={};
+  (data||[]).forEach(r=>{if(!latest[r.m2]) latest[r.m2]=r});
+  merged=cfg.m2Rows.map(base=>{
+    const r=latest[base.name];
+    return {...base,
+      rep67:r?Number(r.repurchase_67):Number(base.rep67Initial||0),
+      dist8:r?Number(r.distribution_8):Number(base.dist8Initial||0),
+      rep8:r?Number(r.repurchase_8):Number(base.rep8Initial||0),
+      submitted:!!r,
+      created_at:r?r.created_at:null
+    }
+  });
+  render();
+}
+
+function render(){
+  const base67=merged.reduce((a,x)=>a+x.base67,0);
+  const rep67=merged.reduce((a,x)=>a+x.rep67,0);
+  const target8=merged.reduce((a,x)=>a+x.target8,0);
+  const dist8=merged.reduce((a,x)=>a+x.dist8,0);
+  const rep8=merged.reduce((a,x)=>a+x.rep8,0);
+  const totalDist=merged.reduce((a,x)=>a+displayTotalDist(x),0), totalRep=rep67+rep8;
+  document.getElementById('totalDist').textContent=fmt(totalDist);
+  document.getElementById('totalFormula').textContent=`6–7月 ${fmt(base67)} ｜ 8月新增 ${fmt(dist8)}`;
+  document.getElementById('cumRep').textContent=pct(totalRep,totalDist);
+  document.getElementById('cumRepNote').textContent=`累计复购 ${fmt(totalRep)} 家`;
+
+  document.getElementById('k67').innerHTML=[
+    ['已铺货',fmt(base67),'售点'],['已复购',fmt(rep67),'售点'],['复购率',pct(rep67,base67),'6–7月累计']
+  ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div></div>`).join('');
+  document.getElementById('k8').innerHTML=[
+    ['目标',fmt(target8),'售点'],['已铺货',fmt(dist8),'售点'],['铺货进度',pct(dist8,target8),'8月新增']
+  ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div></div>`).join('');
+
+  const doneWeek=merged.filter(x=>!!x.created_at).length;
+  document.getElementById('submitCount').textContent=`苏东 TTL：${doneWeek}/${merged.length} 已更新`;
+  document.getElementById('refreshTime').textContent='页面刷新时间：'+new Date().toLocaleString('zh-CN',{hour12:false});
+  document.getElementById('statusByM3').innerHTML=m3Names.map(m3=>{
+    const xs=merged.filter(x=>x.m3===m3);
+    const d=xs.filter(x=>!!x.created_at).length;
+    return `<div class="m3" style="padding:14px">
+      <div class="m3head" style="margin-bottom:8px">${m3}<span style="float:right;font-size:13px;color:#6d7788">${d}/${xs.length} 已更新</span></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${xs.map(x=>{
+          const updated=!!x.created_at;
+          return `<span style="font-size:12px;padding:4px 7px;border-radius:8px;background:${updated?'#eef8f1':'#fff1f1'}">
+            <span>${x.name}</span>
+            <b class="${updated?'today':'stale'}">${updated?'已更新':'待更新'}</b>
+            <span class="timechip">${updated?shortTime(x.created_at):'暂无更新'}</span>
+          </span>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('m3grid').innerHTML=m3Names.map(m3=>{
+    const xs=merged.filter(x=>x.m3===m3);
+    const b=xs.reduce((a,x)=>a+x.base67,0),r=xs.reduce((a,x)=>a+x.rep67,0),t=xs.reduce((a,x)=>a+x.target8,0),d=xs.reduce((a,x)=>a+x.dist8,0),r8=xs.reduce((a,x)=>a+x.rep8,0);
+    return `<div class="m3"><div class="m3head">${m3}<span style="float:right;color:#6d7788;font-size:12px">累计 ${fmt(b+d)}</span></div><div class="split">
+      <div class="block"><div class="tag">6–7月</div><div class="row"><span>铺货</span><b>${fmt(b)}</b></div><div class="row"><span>复购</span><b>${fmt(r)}</b></div><div class="row"><span>复购率</span><b>${pct(r,b)}</b></div><div class="bar" style="margin:5px 0 0"><div class="fill67" style="width:${Math.min((r/b||0)*100,100)}%"></div></div></div>
+      <div class="block"><div class="tag">8月</div><div class="row"><span>目标</span><b>${fmt(t)}</b></div><div class="row"><span>铺货</span><b>${fmt(d)}</b></div><div class="row"><span>铺货进度</span><b>${pct(d,t)}</b></div><div class="bar" style="margin:5px 0 8px"><div class="fill8" style="width:${Math.min((d/t||0)*100,100)}%"></div></div></div>
+    </div></div>`;
+  }).join('');
+  renderTable();
+}
+
+function renderTable(){
+  const f=filter.value;
+  let rows=(f==='ALL'?merged:merged.filter(x=>x.m3===f)).slice();
+  const s=sort.value;
+  const rate=(x,type)=>{
+    if(type==='p8') return x.target8?x.dist8/x.target8:0;
+    if(type==='total') return Number(displayTotalDist(x));
+    if(type==='r67') return x.base67?x.rep67/x.base67:0;
+    if(type==='r8') return x.dist8?x.rep8/x.dist8:0;
+    return 0;
+  };
+  if(s!=='default'){
+    const dir=sortDir.value;
+    rows.sort((a,b)=>dir==='desc'?rate(b,s)-rate(a,s):rate(a,s)-rate(b,s));
+  }
+  document.getElementById('tbody').innerHTML=rows.map(x=>{
+    const r67=x.base67?x.rep67/x.base67:0,p8=x.target8?x.dist8/x.target8:0,r8=x.dist8?x.rep8/x.dist8:0;
+    return `<tr>
+      <td>${x.m3} / ${x.name}</td>
+      <td class="td67">${fmt(x.base67)}</td>
+      <td class="td67">${fmt(x.rep67)}</td>
+      <td class="td67">${pct(x.rep67,x.base67)}<div class="minibar"><div class="miniblue" style="width:${Math.min(r67*100,100)}%"></div></div></td>
+      <td class="td8">${fmt(x.target8)}</td>
+      <td class="td8">${fmt(augDisplayDist(x))}</td>
+      <td class="td8">${pct(augDisplayDist(x),x.target8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(p8*100,100)}%;opacity:${p8>=0.5?1:(p8>=0.2?0.75:0.45)}"></div></div></td>
+      <td class="td8">${fmt(x.rep8)}</td>
+      <td class="td8">${pct(x.rep8,x.dist8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(r8*100,100)}%"></div></div></td>
+      <td class="totaltd">${fmt(displayTotalDist(x))}</td>
+    </tr>`;
+  }).join('');
+}
+filter.addEventListener('change',renderTable);
+sort.addEventListener('change',renderTable);
+sortDir.addEventListener('change',renderTable);
+
+async function unlockDashboard(){
+  document.body.classList.remove('is-locked');
+  document.getElementById('authGate').hidden=true;
+  await load();
+}
+
+async function startAuth(){
+  const {data}=await client.auth.getSession();
+  if(data.session){await unlockDashboard();return}
+  const loginBtn=document.getElementById('loginBtn');
+  const loginMsg=document.getElementById('loginMsg');
+  const signIn=async()=>{
+    const email=document.getElementById('loginEmail').value.trim();
+    const password=document.getElementById('loginPassword').value;
+    if(!email||!password){loginMsg.textContent='请输入邮箱和密码。';return}
+    loginBtn.disabled=true;loginBtn.textContent='登录中…';loginMsg.textContent='';
+    const {error}=await client.auth.signInWithPassword({email,password});
+    loginBtn.disabled=false;loginBtn.textContent='登录查看';
+    if(error){loginMsg.textContent='登录失败，请检查邮箱或密码。';return}
+    await unlockDashboard();
+  };
+  loginBtn.addEventListener('click',signIn);
+  document.getElementById('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter') signIn()});
+}
+
+document.getElementById('logoutBtn').addEventListener('click',async()=>{
+  await client.auth.signOut();
+  location.reload();
+});
+startAuth();
+</script>
+</body></html>
