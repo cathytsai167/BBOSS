@@ -19,6 +19,10 @@ async function exportDashboardImage(target, filename, title, button) {
   }
   const clone = source.cloneNode(true);
   clone.querySelectorAll('.export-btn,.logout-btn').forEach(x => x.remove());
+  [clone, ...clone.querySelectorAll('*')].forEach(x => {
+    const size = parseFloat(getComputedStyle(x).fontSize);
+    if (Number.isFinite(size) && size > 0) x.style.fontSize = Math.round(size * 1.1 * 10) / 10 + 'px';
+  });
   clone.querySelectorAll('.table-wrap,[style*="overflow:auto"]').forEach(x => {
     x.style.maxHeight = 'none'; x.style.height = 'auto'; x.style.overflow = 'visible';
   });
