@@ -12,6 +12,7 @@
   .auth-gate button{width:100%;margin-top:18px;padding:12px;border:0;border-radius:10px;background:#194f90;color:#fff;font-size:16px;font-weight:700}
   .auth-gate button:disabled{opacity:.6}.auth-msg{min-height:22px;margin-top:10px;color:#c0392b;font-size:13px}
   .logout-btn{border:1px solid #d9dee8;border-radius:9px;background:#fff;padding:8px 12px;color:#344054;cursor:pointer}
+  .nav-actions{display:flex;gap:8px;flex-wrap:wrap}.export-btn{border:1px solid #b9c9dc;border-radius:9px;background:#fff;color:#174d8c;padding:8px 12px;font-weight:700;cursor:pointer}.export-btn:hover{background:#eef5fc}.export-btn:disabled{opacity:.55;cursor:wait}
   body.is-locked>:not(#authGate):not(script){display:none!important}
 </style>
 </head>
@@ -27,7 +28,7 @@
   <div id="loginMsg" class="auth-msg" aria-live="polite"></div>
 </div>
 <div class="wrap">
-  <div class="nav"><div><h1>雪白听铺货追踪</h1><div class="sub">苏东 JSE · 自动读取 M2 最新填报</div></div><button id="logoutBtn" class="logout-btn" type="button">退出登录</button></div>
+  <div class="nav"><div><h1>雪白听铺货追踪</h1><div class="sub">苏东 JSE · 自动读取 M2 最新填报</div></div><div class="nav-actions"><button class="export-btn" id="exportDistributionPageBtn" type="button">导出本页完整图片</button><button id="logoutBtn" class="logout-btn" type="button">退出登录</button></div></div>
 
   <div class="hero">
     <div class="totalgrid">
@@ -43,13 +44,14 @@
   <div class="section">M3 区域表现</div>
   <div class="m3grid" id="m3grid"></div>
 
-  <div class="panel">
+  <div class="panel" id="m2ExportArea">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
       <strong>M2明细</strong>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <label style="font-size:13px;color:#6d7788">筛选标准：<select id="filter" style="width:auto"><option value="ALL">全部M3</option></select></label>
         <label style="font-size:13px;color:#6d7788">排序标准：<select id="sort" style="width:auto"><option value="default">默认顺序</option><option value="total">累计铺货</option><option value="p8">8月铺货进度</option><option value="r67">6–7月复购率</option><option value="r8">8月复购率</option></select></label>
         <label style="font-size:13px;color:#6d7788">顺序标准：<select id="sortDir" style="width:auto"><option value="desc">高 → 低</option><option value="asc">低 → 高</option></select></label>
+        <button class="export-btn" id="exportM2Btn" type="button">导出完整M2明细</button>
       </div>
     </div>
     <div style="overflow:auto;margin-top:12px">
@@ -64,6 +66,7 @@
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <div class="section" style="margin-top:26px">M2周度更新状态 <span class="sub" id="submitCount" style="font-weight:500;margin-left:8px"></span></div>
   <div class="m3grid" id="statusByM3"></div>
@@ -243,4 +246,5 @@ document.getElementById('logoutBtn').addEventListener('click',async()=>{
 });
 startAuth();
 </script>
+<script src="export-image.js?v=20260817-1"></script>
 </body></html>
