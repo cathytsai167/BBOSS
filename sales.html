@@ -19,7 +19,7 @@ body{font-size:16px}.header h1{font-size:29px}.header .sub{font-size:16px}.card 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body><div class="wrap">
-<div class="header"><div><h1>雪白听销量追踪</h1><p class="sub">数据更新至 2026/8/16 · STW/STR周期：6/29–8/16</p></div><div class="export-actions"><button class="export-btn" id="exportSalesPageBtn" type="button">导出本页完整图片</button></div></div>
+<div class="header"><div><h1>雪白听销量追踪</h1><p class="sub" id="salesPeriod">销量数据加载中…</p></div><div class="export-actions"><button class="export-btn" id="exportSalesPageBtn" type="button">导出本页完整图片</button></div></div>
 <div class="kpis"><div class="card"><h3>累计 STW</h3><div class="big" id="kpiStw">--</div><div class="hl-note" id="kpiStwHl"></div></div><div class="card"><h3>累计 STR</h3><div class="big str" id="kpiStr">--</div><div class="hl-note" id="kpiStrHl"></div></div><div class="card"><h3>雪白听渗透率</h3><div class="big red" id="kpiRate">--</div><p class="meta">雪白听同期 STR(HL) / 大富豪IH主要SKU同期 STR(HL)</p><p class="meta" id="kpiHl"></p><p class="sku-note">主要SKU包括：超爽瓶/听、金麦芽听、金飘铃瓶、通州瓶、雪白瓶/听</p></div></div>
 <div class="trend-panel"><div class="trend-head"><div class="trend-title">STW / STR 分月趋势</div><div class="trend-legend"><span><i class="dot stw"></i>STW</span><span><i class="dot str"></i>STR</span></div></div><div class="trend-scroll"><svg id="monthlyTrend" viewBox="0 0 1000 280" role="img" aria-label="6月至8月STW和STR趋势图"></svg></div></div>
 <div class="section">M3区域表现</div><div class="regions" id="regions"></div>
@@ -35,6 +35,10 @@ const M2_ORDER=['黄新军&许艳','谢国峰','蔡芳','季红州','梅宇飞',
 const displayM2=m2=>String(m2).replace('邵毅/李海伟','刘洲&李海伟');
 const m2Rank=m2=>{const i=M2_ORDER.indexOf(displayM2(m2));return i<0?999:i};
 function renderDashboard(DATA){
+const shortDate=iso=>{const d=new Date(iso+'T00:00:00');return `${d.getMonth()+1}/${d.getDate()}`};
+const periodDates=[DATA.period.stw_min,DATA.period.str_min].filter(Boolean).sort();
+const periodEnds=[DATA.period.stw_max,DATA.period.str_max].filter(Boolean).sort();
+document.getElementById('salesPeriod').textContent=`数据更新至 ${shortDate(periodEnds.at(-1))} · STW/STR周期：${shortDate(periodDates[0])}–${shortDate(periodEnds.at(-1))}`;
 const viewDealers=DATA.dealers.filter(d=>M3_ORDER.includes(d.m3)&&(d.stw_ytd!==0||d.str_ytd!==0));
 const viewRegions=M3_ORDER.map(name=>DATA.regions.find(r=>r.m3===name)).filter(Boolean);
 const viewTotals=viewDealers.reduce((a,d)=>({stw:a.stw+d.stw_ytd,str:a.str+d.str_ytd,snow_hl:a.snow_hl+d.snow_hl,ih_hl:a.ih_hl+d.ih_hl}),{stw:0,str:0,snow_hl:0,ih_hl:0});
