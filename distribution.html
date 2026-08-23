@@ -12,7 +12,7 @@
   .auth-gate button{width:100%;margin-top:18px;padding:12px;border:0;border-radius:10px;background:#194f90;color:#fff;font-size:16px;font-weight:700}
   .auth-gate button:disabled{opacity:.6}.auth-msg{min-height:22px;margin-top:10px;color:#c0392b;font-size:13px}
   .logout-btn{border:1px solid #d9dee8;border-radius:9px;background:#fff;padding:8px 12px;color:#344054;cursor:pointer}
-  body.is-locked>:not(#authGate):not(script){display:none!important}
+  body.is-locked>:not(#authGate):not(script){display:none!important}.kpi-delta{display:inline-flex;margin-top:8px;padding:5px 8px;border-radius:8px;font-size:12px;font-weight:700}.kpi-delta.up{background:#eaf7f0;color:#217a50}.kpi-delta.down{background:#fff0ef;color:#b43c39}.kpi-delta.flat{background:#f0f2f5;color:#667085}
 </style>
 </head>
 <body class="is-locked">
@@ -31,8 +31,8 @@
 
   <div class="hero">
     <div class="totalgrid">
-      <div class="total"><div class="eyebrow">新品上市以来累计铺货售点</div><div class="big" id="totalDist">—</div><div class="formula" id="totalFormula"></div></div>
-      <div class="total"><div class="eyebrow">累计复购率</div><div class="big" id="cumRep">—</div><div class="formula" id="cumRepNote"></div></div>
+      <div class="total"><div class="eyebrow">新品上市以来累计铺货售点</div><div class="big" id="totalDist">—</div><div class="formula" id="totalFormula"></div><div class="kpi-delta" id="totalDistDelta" hidden></div></div>
+      <div class="total"><div class="eyebrow">累计复购率</div><div class="big" id="cumRep">—</div><div class="formula" id="cumRepNote"></div><div class="kpi-delta" id="cumRepDelta" hidden></div></div>
     </div>
     <div style="display:grid;gap:14px">
       <div class="period p67"><h2>6–7月｜存量铺货 & 复购</h2><div class="kpis" id="k67"></div></div>
@@ -116,26 +116,19 @@ const sort=document.getElementById('sort');
 const sortDir=document.getElementById('sortDir');
 m3Names.forEach(x=>{const o=document.createElement('option');o.value=x;o.textContent=x;filter.appendChild(o)});
 
-let merged=[];
+let merged=[],mergedPrevious=[];
 
+const weekStartTime=()=>{const now=new Date(),start=new Date(now),day=(now.getDay()+6)%7;start.setDate(now.getDate()-day);start.setHours(12,0,0,0);if(now<start)start.setDate(start.getDate()-7);return start};
+const mergeRows=latest=>cfg.m2Rows.map(base=>{const r=latest[base.name];return {...base,rep67:r?Number(r.repurchase_67):Number(base.rep67Initial||0),dist8:r?Number(r.distribution_8):Number(base.dist8Initial||0),rep8:r?Number(r.repurchase_8):Number(base.rep8Initial||0),submitted:!!r&&isThisWeek(r.created_at),created_at:r?r.created_at:null}});
 async function load(){
   const {data,error}=await client.from('xuebai_weekly').select('*').order('created_at',{ascending:false});
   if(error){document.getElementById('refreshTime').textContent='读取失败：'+error.message;return}
-  const latest={};
-  (data||[]).forEach(r=>{if(!latest[r.m2]) latest[r.m2]=r});
-  merged=cfg.m2Rows.map(base=>{
-    const r=latest[base.name];
-    return {...base,
-      rep67:r?Number(r.repurchase_67):Number(base.rep67Initial||0),
-      dist8:r?Number(r.distribution_8):Number(base.dist8Initial||0),
-      rep8:r?Number(r.repurchase_8):Number(base.rep8Initial||0),
-      submitted:!!r&&isThisWeek(r.created_at),
-      created_at:r?r.created_at:null
-    }
-  });
-  render();
+  const latest={},previous={},cutoff=weekStartTime();
+  (data||[]).forEach(r=>{if(!latest[r.m2])latest[r.m2]=r;if(new Date(r.created_at)<cutoff&&!previous[r.m2])previous[r.m2]=r});
+  merged=mergeRows(latest);mergedPrevious=mergeRows(previous);render();
 }
 
+function showKpiDelta(id,current,previous,{ratePoint=false}={}){const el=document.getElementById(id);if(!previous||!isFinite(previous)){el.hidden=true;return}const diff=current-previous,relative=diff/previous,arrow=diff>0?'↑':diff<0?'↓':'→';el.className='kpi-delta '+(diff>0?'up':diff<0?'down':'flat');const amount=ratePoint?`${diff>=0?'+':''}${(diff*100).toFixed(1)}pp`:`${diff>=0?'+':''}${Math.round(diff).toLocaleString('zh-CN')}`;el.textContent=`${arrow} ${amount} · 较上周 ${relative>=0?'+':''}${(relative*100).toFixed(1)}%`;el.hidden=false}
 function render(){
   const base67=merged.reduce((a,x)=>a+x.base67,0);
   const rep67=merged.reduce((a,x)=>a+x.rep67,0);
@@ -146,14 +139,14 @@ function render(){
   document.getElementById('totalDist').textContent=fmt(totalDist);
   document.getElementById('totalFormula').textContent=`6–7月 ${fmt(base67)} ｜ 8月新增 ${fmt(dist8)}`;
   document.getElementById('cumRep').textContent=pct(totalRep,totalDist);
-  document.getElementById('cumRepNote').textContent=`累计复购 ${fmt(totalRep)} 家`;
+  document.getElementById('cumRepNote').textContent=`累计复购 ${fmt(totalRep)} 家`;const previousDist=mergedPrevious.reduce((a,x)=>a+displayTotalDist(x),0),previousRep=mergedPrevious.reduce((a,x)=>a+x.rep67+x.rep8,0);showKpiDelta('totalDistDelta',totalDist,previousDist);showKpiDelta('cumRepDelta',totalRep/totalDist,previousRep/previousDist,{ratePoint:true});
 
   document.getElementById('k67').innerHTML=[
     ['已铺货',fmt(base67),'售点'],['已复购',fmt(rep67),'售点'],['复购率',pct(rep67,base67),'6–7月累计']
-  ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div></div>`).join('');
+  ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div>${x[3]||''}</div>`).join('');
   document.getElementById('k8').innerHTML=[
-    ['目标',fmt(target8),'售点'],['已铺货',fmt(dist8),'售点'],['铺货进度',pct(dist8,target8),'8月新增']
-  ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div></div>`).join('');
+    ['目标',fmt(target8),'售点',''],['已铺货',fmt(dist8),'售点',(()=>{const p=mergedPrevious.reduce((a,x)=>a+x.dist8,0);return p?`<div class="kpi-delta ${dist8-p>=0?'up':'down'}">${dist8-p>=0?'↑':'↓'} ${dist8-p>=0?'+':''}${fmt(dist8-p)} · 较上周 ${((dist8-p)/p*100)>=0?'+':''}${((dist8-p)/p*100).toFixed(1)}%</div>`:''})()],['铺货进度',pct(dist8,target8),'8月新增',(()=>{const p=mergedPrevious.reduce((a,x)=>a+x.dist8,0)/target8,c=dist8/target8;return p?`<div class="kpi-delta ${c-p>=0?'up':'down'}">${c-p>=0?'↑':'↓'} ${c-p>=0?'+':''}${((c-p)*100).toFixed(1)}pp · 较上周</div>`:''})()]
+  ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div>${x[3]||''}</div>`).join('');
 
   const doneWeek=merged.filter(x=>x.submitted).length;
   document.getElementById('submitCount').textContent=`苏东 TTL：${doneWeek}/${merged.length} 已更新`;
