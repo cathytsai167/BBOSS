@@ -134,7 +134,7 @@ async function load(){
   merged=mergeRows(latest);mergedPrevious=mergeRows(previous);render();
 }
 
-function showKpiDelta(id,current,previous,{ratePoint=false}={}){const el=document.getElementById(id);if(!previous||!isFinite(previous)){el.hidden=true;return}const diff=current-previous,relative=diff/previous,arrow=diff>0?'↑':diff<0?'↓':'→';el.className='kpi-delta '+(diff>0?'up':diff<0?'down':'flat');const amount=ratePoint?`${diff>=0?'+':''}${(diff*100).toFixed(1)}pp`:`${diff>=0?'+':''}${Math.round(diff).toLocaleString('zh-CN')}`;el.textContent=`${arrow} ${amount} · 较上周 ${relative>=0?'+':''}${(relative*100).toFixed(1)}%`;el.hidden=false}
+function showKpiDelta(id,current,previous,{ratePoint=false}={}){const el=document.getElementById(id);if(!previous||!isFinite(previous)){el.hidden=true;return}const diff=current-previous,arrow=diff>0?'↑':diff<0?'↓':'→';el.className='kpi-delta '+(diff>0?'up':diff<0?'down':'flat');const amount=ratePoint?`${diff>=0?'+':''}${(diff*100).toFixed(1)}pp`:`${diff>=0?'+':''}${Math.round(diff).toLocaleString('zh-CN')}`;el.textContent=`${arrow} ${amount} · 较上周`;el.hidden=false}
 function render(){
   const base67=merged.reduce((a,x)=>a+x.base67,0);
   const rep67=merged.reduce((a,x)=>a+x.rep67,0);
@@ -151,7 +151,7 @@ function render(){
     ['已铺货',fmt(base67),'售点'],['已复购',fmt(rep67),'售点'],['复购率',pct(rep67,base67),'6–7月累计']
   ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div>${x[3]||''}</div>`).join('');
   document.getElementById('k8').innerHTML=[
-    ['目标',fmt(target8),'售点',''],['已铺货',fmt(dist8),'售点',(()=>{const p=mergedPrevious.reduce((a,x)=>a+x.dist8,0);return p?`<div class="kpi-delta ${dist8-p>=0?'up':'down'}">${dist8-p>=0?'↑':'↓'} ${dist8-p>=0?'+':''}${fmt(dist8-p)} · 较上周 ${((dist8-p)/p*100)>=0?'+':''}${((dist8-p)/p*100).toFixed(1)}%</div>`:''})()],['铺货进度',pct(dist8,target8),'8月新增',(()=>{const p=mergedPrevious.reduce((a,x)=>a+x.dist8,0)/target8,c=dist8/target8;return p?`<div class="kpi-delta ${c-p>=0?'up':'down'}">${c-p>=0?'↑':'↓'} ${c-p>=0?'+':''}${((c-p)*100).toFixed(1)}pp · 较上周</div>`:''})()]
+    ['目标',fmt(target8),'售点',''],['已铺货',fmt(dist8),'售点',(()=>{const p=mergedPrevious.reduce((a,x)=>a+x.dist8,0);return p?`<div class="kpi-delta ${dist8-p>=0?'up':'down'}">${dist8-p>=0?'↑':'↓'} ${dist8-p>=0?'+':''}${fmt(dist8-p)} · 较上周</div>`:''})()],['铺货进度',pct(dist8,target8),'8月新增',(()=>{const p=mergedPrevious.reduce((a,x)=>a+x.dist8,0)/target8,c=dist8/target8;return p?`<div class="kpi-delta ${c-p>=0?'up':'down'}">${c-p>=0?'↑':'↓'} ${c-p>=0?'+':''}${((c-p)*100).toFixed(1)}pp · 较上周</div>`:''})()]
   ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div>${x[3]||''}</div>`).join('');
 
   const doneWeek=merged.filter(x=>x.submitted).length;
