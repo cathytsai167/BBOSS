@@ -98,7 +98,7 @@ const isThisWeek=iso=>{
   if(!iso) return false;
   const now=new Date();
   const weekStart=new Date(now);
-  const day=(now.getDay()+6)%7;
+  const day=(now.getDay()+2)%7;
   weekStart.setDate(now.getDate()-day);
   weekStart.setHours(12,0,0,0);
   if(now<weekStart) weekStart.setDate(weekStart.getDate()-7);
@@ -118,8 +118,9 @@ m3Names.forEach(x=>{const o=document.createElement('option');o.value=x;o.textCon
 
 let merged=[],mergedPrevious=[];
 
-const weekStartTime=()=>{const now=new Date(),start=new Date(now),day=(now.getDay()+6)%7;start.setDate(now.getDate()-day);start.setHours(12,0,0,0);if(now<start)start.setDate(start.getDate()-7);return start};
-const mergeRows=latest=>cfg.m2Rows.map(base=>{const r=latest[base.name];return {...base,rep67:r?Number(r.repurchase_67):Number(base.rep67Initial||0),dist8:r?Number(r.distribution_8):Number(base.dist8Initial||0),rep8:r?Number(r.repurchase_8):Number(base.rep8Initial||0),submitted:!!r&&isThisWeek(r.created_at),created_at:r?r.created_at:null}});
+const weekStartTime=()=>{const now=new Date(),start=new Date(now),day=(now.getDay()+2)%7;start.setDate(now.getDate()-day);start.setHours(12,0,0,0);if(now<start)start.setDate(start.getDate()-7);return start};
+const recordTime=r=>r&&(r.updated_at||r.created_at);
+const mergeRows=latest=>cfg.m2Rows.map(base=>{const r=latest[base.name],submittedAt=recordTime(r);return {...base,rep67:r?Number(r.repurchase_67):Number(base.rep67Initial||0),dist8:r?Number(r.distribution_8):Number(base.dist8Initial||0),rep8:r?Number(r.repurchase_8):Number(base.rep8Initial||0),submitted:!!r&&isThisWeek(submittedAt),created_at:submittedAt}});
 async function load(){
   const {data,error}=await client.from('xuebai_weekly').select('*').order('created_at',{ascending:false});
   if(error){document.getElementById('refreshTime').textContent='读取失败：'+error.message;return}
@@ -130,7 +131,7 @@ async function load(){
   const baseline=(salesRows||[]).filter(x=>x.id.startsWith('baseline_')&&periodEnd(x)<currentEnd).sort((a,b)=>periodEnd(b)-periodEnd(a))[0];
   const cutoff=baseline?new Date(periodEnd(baseline)):new Date(weekStartTime().getTime()-1);
   const latest={},previous={};
-  (data||[]).forEach(r=>{if(!latest[r.m2])latest[r.m2]=r;if(new Date(r.created_at)<cutoff&&!previous[r.m2])previous[r.m2]=r});
+  (data||[]).sort((a,b)=>new Date(recordTime(b))-new Date(recordTime(a))).forEach(r=>{if(!latest[r.m2])latest[r.m2]=r;if(new Date(recordTime(r))<cutoff&&!previous[r.m2])previous[r.m2]=r});
   merged=mergeRows(latest);mergedPrevious=mergeRows(previous);render();
 }
 
