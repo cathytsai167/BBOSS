@@ -36,9 +36,7 @@ const displayM2=m2=>String(m2).replace('邵毅/李海伟','刘洲&李海伟');
 const m2Rank=m2=>{const i=M2_ORDER.indexOf(displayM2(m2));return i<0?999:i};
 function renderDashboard(DATA,PREVIOUS_DATA=null){
 const shortDate=iso=>{const d=new Date(iso+'T00:00:00');return `${d.getMonth()+1}/${d.getDate()}`};
-const periodDates=[DATA.period.stw_min,DATA.period.str_min].filter(Boolean).sort();
-const periodEnds=[DATA.period.stw_max,DATA.period.str_max].filter(Boolean).sort();
-document.getElementById('salesPeriod').textContent=`数据更新至 ${shortDate(periodEnds.at(-1))} · STW/STR周期：${shortDate(periodDates[0])}–${shortDate(periodEnds.at(-1))}`;
+document.getElementById('salesPeriod').textContent=`STW截至 ${shortDate(DATA.period.stw_max)} · STR周期：${shortDate(DATA.period.str_min)}–${shortDate(DATA.period.str_max)}`;
 const viewDealers=DATA.dealers.filter(d=>M3_ORDER.includes(d.m3)&&(d.stw_ytd!==0||d.str_ytd!==0));
 const viewRegions=M3_ORDER.map(name=>DATA.regions.find(r=>r.m3===name)).filter(Boolean);
 const viewTotals=viewDealers.reduce((a,d)=>({stw:a.stw+d.stw_ytd,str:a.str+d.str_ytd,snow_hl:a.snow_hl+d.snow_hl,ih_hl:a.ih_hl+d.ih_hl}),{stw:0,str:0,snow_hl:0,ih_hl:0});

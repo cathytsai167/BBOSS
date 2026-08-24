@@ -48,8 +48,8 @@ async function load(){
   const currentRow=(salesRows||[]).find(x=>x.id==='current'),previousRow=(salesRows||[]).find(x=>x.id==='previous');
   if(salesError||!currentRow){document.getElementById('status').textContent='销量数据读取失败：'+((salesError&&salesError.message)||'暂无数据');return}
   SALES_DATA=currentRow.payload;
-  const salesEnd=new Date(SALES_DATA.period.str_max+'T00:00:00');
-  document.getElementById('analysisPeriod').textContent=`铺货执行 × 销量表现 · 销量数据截至${salesEnd.getMonth()+1}/${salesEnd.getDate()}`;
+  const stwEnd=new Date(SALES_DATA.period.stw_max+'T00:00:00'),strEnd=new Date(SALES_DATA.period.str_max+'T00:00:00');
+  document.getElementById('analysisPeriod').textContent=`铺货执行 × 销量表现 · STW截至${stwEnd.getMonth()+1}/${stwEnd.getDate()} · STR截至${strEnd.getMonth()+1}/${strEnd.getDate()}`;
   const {data,error}=await client.from('xuebai_weekly').select('*').order('created_at',{ascending:false});
   if(error){document.getElementById('status').textContent='铺货数据读取失败：'+error.message;return}
   rows=buildRows(SALES_DATA,data);
