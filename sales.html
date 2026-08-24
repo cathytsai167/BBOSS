@@ -77,8 +77,11 @@ const secureClient=supabase.createClient('https://hjuemoaxwotvgvppuits.supabase.
 async function bootstrapSales(){
   const {data:{session}}=await secureClient.auth.getSession();
   if(!session){document.body.innerHTML='<div style="max-width:520px;margin:12vh auto;padding:28px;font-family:sans-serif"><h2>请先登录</h2><p>请从雪白看板首页登录后查看销量数据。</p></div>';return}
-  const {data,error}=await secureClient.from('sales_dashboard_data').select('id,payload').in('id',['current','previous']);
-  const currentRow=(data||[]).find(x=>x.id==='current'),previousRow=(data||[]).find(x=>x.id==='previous');
+  const {data,error}=await secureClient.from('sales_dashboard_data').select('id,payload');
+  const currentRow=(data||[]).find(x=>x.id==='current');
+  const periodEnd=row=>Math.max(new Date(row.payload.period.stw_max+'T23:59:59').getTime(),new Date(row.payload.period.str_max+'T23:59:59').getTime());
+  const currentEnd=currentRow?periodEnd(currentRow):0;
+  const previousRow=(data||[]).filter(x=>x.id.startsWith('baseline_')&&periodEnd(x)<currentEnd).sort((a,b)=>periodEnd(b)-periodEnd(a))[0];
   if(error||!currentRow){document.body.innerHTML='<div style="max-width:620px;margin:12vh auto;padding:28px;font-family:sans-serif"><h2>销量数据读取失败</h2><p>'+((error&&error.message)||'暂无数据')+'</p></div>';return}
   DATA=currentRow.payload;renderDashboard(DATA,previousRow?previousRow.payload:null);
 }

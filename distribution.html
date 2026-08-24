@@ -123,7 +123,13 @@ const mergeRows=latest=>cfg.m2Rows.map(base=>{const r=latest[base.name];return {
 async function load(){
   const {data,error}=await client.from('xuebai_weekly').select('*').order('created_at',{ascending:false});
   if(error){document.getElementById('refreshTime').textContent='读取失败：'+error.message;return}
-  const latest={},previous={},cutoff=weekStartTime();
+  const {data:salesRows}=await client.from('sales_dashboard_data').select('id,payload');
+  const currentRow=(salesRows||[]).find(x=>x.id==='current');
+  const periodEnd=row=>Math.max(new Date(row.payload.period.stw_max+'T23:59:59').getTime(),new Date(row.payload.period.str_max+'T23:59:59').getTime());
+  const currentEnd=currentRow?periodEnd(currentRow):Date.now();
+  const baseline=(salesRows||[]).filter(x=>x.id.startsWith('baseline_')&&periodEnd(x)<currentEnd).sort((a,b)=>periodEnd(b)-periodEnd(a))[0];
+  const cutoff=baseline?new Date(periodEnd(baseline)):new Date(weekStartTime().getTime()-1);
+  const latest={},previous={};
   (data||[]).forEach(r=>{if(!latest[r.m2])latest[r.m2]=r;if(new Date(r.created_at)<cutoff&&!previous[r.m2])previous[r.m2]=r});
   merged=mergeRows(latest);mergedPrevious=mergeRows(previous);render();
 }
