@@ -11,8 +11,8 @@
   <div class="card" style="padding:18px">
     <div class="field"><label for="m2">M2</label><select id="m2"><option value="">请选择M2</option></select></div>
     <div class="field"><label for="rep67">6–7月已铺货售点中，累计已复购售点数</label><input id="rep67" type="number" min="0" step="1" inputmode="numeric"><div class="hint">截至当前累计已复购售点数，非本周新增。</div></div>
-    <div class="field"><label for="dist8">8月累计已铺货售点数</label><input id="dist8" type="number" min="0" step="1" inputmode="numeric"><div class="hint">8月1日至今累计新增铺货售点数。</div></div>
-    <div class="field"><label for="rep8">8月已铺货售点中，累计已复购售点数</label><input id="rep8" type="number" min="0" step="1" inputmode="numeric"><div class="hint">须小于或等于8月累计已铺货售点数。</div></div>
+    <div class="field"><label for="dist8" id="distMonthLabel">当月累计新增铺货售点数</label><input id="dist8" type="number" min="0" step="1" inputmode="numeric"><div class="hint" id="distMonthHint"></div></div>
+    <div class="field"><label for="rep8" id="repMonthLabel">当月新增售点中，累计已复购售点数</label><input id="rep8" type="number" min="0" step="1" inputmode="numeric"><div class="hint" id="repMonthHint"></div></div>
     <button id="submitBtn" class="primary" type="button">提交本周数据</button>
     <div id="msg" class="msg" aria-live="polite"></div>
   </div>
@@ -23,6 +23,11 @@
 const cfg=window.XUEBAI_CONFIG;
 const client=supabase.createClient(cfg.supabaseUrl,cfg.supabaseKey);
 const m2=document.getElementById('m2');
+const now=new Date(),reportMonth=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`,monthLabel=`${now.getMonth()+1}月`;
+document.getElementById('distMonthLabel').textContent=`${monthLabel}累计新增铺货售点数`;
+document.getElementById('distMonthHint').textContent=`${monthLabel}1日至今累计新增铺货售点数。`;
+document.getElementById('repMonthLabel').textContent=`${monthLabel}新增售点中，累计已复购售点数`;
+document.getElementById('repMonthHint').textContent=`须小于或等于${monthLabel}累计新增铺货售点数。`;
 cfg.m2Rows.forEach(x=>{const o=document.createElement('option');o.value=x.name;o.textContent=x.name;m2.appendChild(o)});
 function msg(t,c=''){const e=document.getElementById('msg');e.textContent=t;e.className='msg '+c}
 document.getElementById('submitBtn').addEventListener('click',async()=>{
@@ -31,9 +36,9 @@ document.getElementById('submitBtn').addEventListener('click',async()=>{
   const rep8=Number(document.getElementById('rep8').value);
   if(!m2.value){msg('请选择M2。','err');return}
   if([rep67,dist8,rep8].some(v=>!Number.isInteger(v)||v<0)){msg('三个数字都需填写非负整数。','err');return}
-  if(rep8>dist8){msg('8月累计复购不能大于8月累计铺货。','err');return}
+  if(rep8>dist8){msg(`${monthLabel}累计复购不能大于${monthLabel}累计铺货。`,'err');return}
   const btn=document.getElementById('submitBtn');btn.disabled=true;btn.textContent='提交中...';
-  const {error}=await client.from('xuebai_weekly').insert({m2:m2.value,repurchase_67:rep67,distribution_8:dist8,repurchase_8:rep8});
+  const {error}=await client.from('xuebai_weekly').insert({m2:m2.value,repurchase_67:rep67,distribution_8:dist8,repurchase_8:rep8,report_month:reportMonth});
   btn.disabled=false;btn.textContent='提交本周数据';
   if(error){msg('提交失败：'+error.message,'err');return}
   msg('提交成功，感谢更新。','ok');
