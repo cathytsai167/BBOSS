@@ -48,7 +48,7 @@
       <strong>M2明细</strong>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <label style="font-size:13px;color:#6d7788">筛选标准：<select id="filter" style="width:auto"><option value="ALL">全部M3</option></select></label>
-        <label style="font-size:13px;color:#6d7788">排序标准：<select id="sort" style="width:auto"><option value="default">默认顺序</option><option value="total">累计铺货</option><option value="p8">8月铺货进度</option><option value="r67">6–7月复购率</option><option value="r8">8月复购率</option></select></label>
+        <label style="font-size:13px;color:#6d7788">排序标准：<select id="sort" style="width:auto"><option value="default">默认顺序</option><option value="total">累计铺货</option><option value="p8">8月达成率</option><option value="r67">6–7月复购率</option><option value="r8">8月复购率</option></select></label>
         <label style="font-size:13px;color:#6d7788">顺序标准：<select id="sortDir" style="width:auto"><option value="desc">高 → 低</option><option value="asc">低 → 高</option></select></label>
       </div>
     </div>
@@ -56,7 +56,7 @@
       <table>
         <thead>
           <tr><th rowspan="2">M3 / M2</th><th colspan="3" class="th67" style="text-align:center">6–7月｜铺货 & 复购</th><th colspan="5" class="th8" style="text-align:center">8月｜新增铺货 & 复购</th><th rowspan="2">累计铺货</th></tr>
-          <tr><th class="th67">铺货</th><th class="th67">复购</th><th class="th67">复购率</th><th class="th8">目标</th><th class="th8">铺货</th><th class="th8">铺货进度</th><th class="th8">复购</th><th class="th8">复购率</th></tr>
+          <tr><th class="th67">铺货</th><th class="th67">复购</th><th class="th67">复购率</th><th class="th8">目标</th><th class="th8">铺货</th><th class="th8">达成率</th><th class="th8">复购</th><th class="th8">复购率</th></tr>
         </thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -130,14 +130,15 @@ async function load(){
   const currentRow=(salesRows||[]).find(x=>x.id==='current');
   const periodEnd=row=>Math.max(new Date(row.payload.period.stw_max+'T23:59:59').getTime(),new Date(row.payload.period.str_max+'T23:59:59').getTime());
   const currentEnd=currentRow?periodEnd(currentRow):Date.now();
-  const baseline=(salesRows||[]).filter(x=>x.id.startsWith('baseline_')&&periodEnd(x)<currentEnd).sort((a,b)=>periodEnd(b)-periodEnd(a))[0];
+  const currentDate=new Date(currentEnd),previousMonthEnd=new Date(currentDate.getFullYear(),currentDate.getMonth(),0,23,59,59,999).getTime();
+  const baseline=(salesRows||[]).filter(x=>x.id.startsWith('baseline_')&&periodEnd(x)<=previousMonthEnd).sort((a,b)=>periodEnd(b)-periodEnd(a))[0];
   const cutoff=baseline?new Date(periodEnd(baseline)):new Date(weekStartTime().getTime()-1);
   const latest={},previous={};
   (data||[]).sort((a,b)=>new Date(recordTime(b))-new Date(recordTime(a))).forEach(r=>{if(!latest[r.m2])latest[r.m2]=r;if(new Date(recordTime(r))<cutoff&&!previous[r.m2])previous[r.m2]=r});
   merged=mergeRows(latest);mergedPrevious=mergeRows(previous);render();
 }
 
-function showKpiDelta(id,current,previous,{ratePoint=false}={}){const el=document.getElementById(id);if(!previous||!isFinite(previous)){el.hidden=true;return}const diff=current-previous,arrow=diff>0?'↑':diff<0?'↓':'→';el.className='kpi-delta '+(diff>0?'up':diff<0?'down':'flat');const amount=ratePoint?`${diff>=0?'+':''}${(diff*100).toFixed(1)}pp`:`${diff>=0?'+':''}${Math.round(diff).toLocaleString('zh-CN')}`;el.textContent=`${arrow} ${amount} · 较上周`;el.hidden=false}
+function showKpiDelta(id,current,previous,{ratePoint=false}={}){const el=document.getElementById(id);if(!previous||!isFinite(previous)){el.hidden=true;return}const diff=current-previous,arrow=diff>0?'↑':diff<0?'↓':'→';el.className='kpi-delta '+(diff>0?'up':diff<0?'down':'flat');const amount=ratePoint?`${diff>=0?'+':''}${(diff*100).toFixed(1)}pp`:`${diff>=0?'+':''}${Math.round(diff).toLocaleString('zh-CN')}`;el.textContent=`${arrow} ${amount} · 较上月底`;el.hidden=false}
 function render(){
   const base67=merged.reduce((a,x)=>a+x.base67,0);
   const rep67=merged.reduce((a,x)=>a+x.rep67,0);
@@ -154,7 +155,7 @@ function render(){
     ['已铺货',fmt(base67),'售点'],['已复购',fmt(rep67),'售点'],['复购率',pct(rep67,base67),'6–7月累计']
   ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div>${x[3]||''}</div>`).join('');
   document.getElementById('k8').innerHTML=[
-    ['目标',fmt(target8),'售点',''],['已铺货',fmt(dist8),'售点',(()=>{const p=mergedPrevious.reduce((a,x)=>a+x.dist8,0);return p?`<div class="kpi-delta ${dist8-p>=0?'up':'down'}">${dist8-p>=0?'↑':'↓'} ${dist8-p>=0?'+':''}${fmt(dist8-p)} · 较上周</div>`:''})()],['铺货进度',pct(dist8,target8),'8月新增',(()=>{const p=mergedPrevious.reduce((a,x)=>a+x.dist8,0)/target8,c=dist8/target8;return p?`<div class="kpi-delta ${c-p>=0?'up':'down'}">${c-p>=0?'↑':'↓'} ${c-p>=0?'+':''}${((c-p)*100).toFixed(1)}pp · 较上周</div>`:''})()]
+    ['目标',fmt(target8),'售点',''],['已铺货',fmt(dist8),'售点',''],['达成率',pct(dist8,target8),'8月新增','']
   ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div>${x[3]||''}</div>`).join('');
 
   const doneWeek=merged.filter(x=>x.submitted).length;
@@ -183,7 +184,7 @@ function render(){
     const b=xs.reduce((a,x)=>a+x.base67,0),r=xs.reduce((a,x)=>a+x.rep67,0),t=xs.reduce((a,x)=>a+x.target8,0),d=xs.reduce((a,x)=>a+x.dist8,0),r8=xs.reduce((a,x)=>a+x.rep8,0);
     return `<div class="m3"><div class="m3head">${m3}<span style="float:right;color:#6d7788;font-size:12px">累计 ${fmt(b+d)}</span></div><div class="split">
       <div class="block"><div class="tag">6–7月</div><div class="row"><span>铺货</span><b>${fmt(b)}</b></div><div class="row"><span>复购</span><b>${fmt(r)}</b></div><div class="row"><span>复购率</span><b>${pct(r,b)}</b></div><div class="bar" style="margin:5px 0 0"><div class="fill67" style="width:${Math.min((r/b||0)*100,100)}%"></div></div></div>
-      <div class="block"><div class="tag">8月</div><div class="row"><span>目标</span><b>${fmt(t)}</b></div><div class="row"><span>铺货</span><b>${fmt(d)}</b></div><div class="row"><span>铺货进度</span><b>${pct(d,t)}</b></div><div class="bar" style="margin:5px 0 8px"><div class="fill8" style="width:${Math.min((d/t||0)*100,100)}%"></div></div></div>
+      <div class="block"><div class="tag">8月</div><div class="row"><span>目标</span><b>${fmt(t)}</b></div><div class="row"><span>铺货</span><b>${fmt(d)}</b></div><div class="row"><span>达成率</span><b>${pct(d,t)}</b></div><div class="bar" style="margin:5px 0 8px"><div class="fill8" style="width:${Math.min((d/t||0)*100,100)}%"></div></div></div>
     </div></div>`;
   }).join('');
   renderTable();
