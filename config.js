@@ -12,7 +12,7 @@ window.XUEBAI_CONFIG = {
     "rep8Initial": 0
   },
   {
-    "m3": "丁点",
+    "m3": "孟祥杰",
     "name": "谢国峰",
     "base67": 605,
     "rep67Initial": 61,
@@ -21,7 +21,7 @@ window.XUEBAI_CONFIG = {
     "rep8Initial": 0
   },
   {
-    "m3": "杨晓超",
+    "m3": "丁点",
     "name": "蔡芳",
     "base67": 302,
     "rep67Initial": 48,
@@ -30,7 +30,7 @@ window.XUEBAI_CONFIG = {
     "rep8Initial": 0
   },
   {
-    "m3": "杨晓超",
+    "m3": "丁点",
     "name": "季红州",
     "base67": 430,
     "rep67Initial": 72,
@@ -39,7 +39,7 @@ window.XUEBAI_CONFIG = {
     "rep8Initial": 0
   },
   {
-    "m3": "杨晓超",
+    "m3": "丁点",
     "name": "梅宇飞",
     "base67": 152,
     "rep67Initial": 22,
@@ -48,7 +48,7 @@ window.XUEBAI_CONFIG = {
     "rep8Initial": 0
   },
   {
-    "m3": "杨晓超",
+    "m3": "孟祥杰",
     "name": "高凌峰",
     "base67": 313,
     "rep67Initial": 56,
