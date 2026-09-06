@@ -45,7 +45,7 @@ const viewTotals=viewDealers.reduce((a,d)=>({stw:a.stw+d.stw_ytd,str:a.str+d.str
 viewTotals.penetration=viewTotals.ih_hl?viewTotals.snow_hl/viewTotals.ih_hl:null;
 const previousDealers=PREVIOUS_DATA?PREVIOUS_DATA.dealers.filter(d=>M3_ORDER.includes(d.m3)&&(d.stw_ytd!==0||d.str_ytd!==0)):[];
 const previousTotals=previousDealers.reduce((a,d)=>({stw:a.stw+d.stw_ytd,str:a.str+d.str_ytd,snow_hl:a.snow_hl+d.snow_hl,ih_hl:a.ih_hl+d.ih_hl}),{stw:0,str:0,snow_hl:0,ih_hl:0});previousTotals.penetration=previousTotals.ih_hl?previousTotals.snow_hl/previousTotals.ih_hl:null;
-const showDelta=(id,current,previous,{digits=0,ratePoint=false}={})=>{const el=document.getElementById(id);if(previous==null||!isFinite(previous)||previous===0){el.hidden=true;return}const diff=current-previous,arrow=diff>0?'↑':diff<0?'↓':'→';el.className='kpi-delta '+(diff>0?'up':diff<0?'down':'flat');const amount=ratePoint?`${diff>=0?'+':''}${(diff*100).toFixed(1)}pp`:`${diff>=0?'+':''}${Number(diff.toFixed(digits)).toLocaleString('zh-CN')}`;el.textContent=`${arrow} ${amount} · 较上月底`;el.hidden=false};
+const showDelta=(id,current,previous,{digits=0,ratePoint=false}={})=>{const el=document.getElementById(id);if(previous==null||!isFinite(previous)||previous===0){el.hidden=true;return}const diff=current-previous,arrow=diff>0?'↑':diff<0?'↓':'→';el.className='kpi-delta '+(diff>0?'up':diff<0?'down':'flat');const amount=ratePoint?`${diff>=0?'+':''}${(diff*100).toFixed(1)}pp`:`${diff>=0?'+':''}${Number(diff.toFixed(digits)).toLocaleString('zh-CN')}`;el.textContent=`${arrow} ${amount} · 较7月底`;el.hidden=false};
 document.getElementById('kpiStw').textContent=fmt(viewTotals.stw)+' 箱';
 document.getElementById('kpiStr').textContent=fmt(viewTotals.str)+' 箱';
 document.getElementById('kpiStwHl').textContent=`折合 ${fmtHl(viewTotals.stw*0.06)} HL`;
@@ -82,9 +82,8 @@ async function bootstrapSales(){
   const {data,error}=await secureClient.from('sales_dashboard_data').select('id,payload');
   const currentRow=(data||[]).find(x=>x.id==='current');
   const periodEnd=row=>Math.max(new Date(row.payload.period.stw_max+'T23:59:59').getTime(),new Date(row.payload.period.str_max+'T23:59:59').getTime());
-  const currentEnd=currentRow?periodEnd(currentRow):0;
-  const currentDate=new Date(currentEnd),previousMonthEnd=new Date(currentDate.getFullYear(),currentDate.getMonth(),0,23,59,59,999).getTime();
-  const previousRow=(data||[]).filter(x=>x.id.startsWith('baseline_')&&periodEnd(x)<=previousMonthEnd).sort((a,b)=>periodEnd(b)-periodEnd(a))[0];
+  const julyEnd=new Date('2026-07-31T23:59:59').getTime();
+  const previousRow=(data||[]).filter(x=>x.id.startsWith('baseline_')&&periodEnd(x)<=julyEnd).sort((a,b)=>periodEnd(b)-periodEnd(a))[0];
   if(error||!currentRow){document.body.innerHTML='<div style="max-width:620px;margin:12vh auto;padding:28px;font-family:sans-serif"><h2>销量数据读取失败</h2><p>'+((error&&error.message)||'暂无数据')+'</p></div>';return}
   DATA=currentRow.payload;renderDashboard(DATA,previousRow?previousRow.payload:null);
 }

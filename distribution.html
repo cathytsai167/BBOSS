@@ -130,15 +130,17 @@ async function load(){
   const currentRow=(salesRows||[]).find(x=>x.id==='current');
   const periodEnd=row=>Math.max(new Date(row.payload.period.stw_max+'T23:59:59').getTime(),new Date(row.payload.period.str_max+'T23:59:59').getTime());
   const currentEnd=currentRow?periodEnd(currentRow):Date.now();
-  const currentDate=new Date(currentEnd),previousMonthEnd=new Date(currentDate.getFullYear(),currentDate.getMonth(),0,23,59,59,999).getTime();
-  const baseline=(salesRows||[]).filter(x=>x.id.startsWith('baseline_')&&periodEnd(x)<=previousMonthEnd).sort((a,b)=>periodEnd(b)-periodEnd(a))[0];
+  const julyEnd=new Date('2026-07-31T23:59:59').getTime();
+  const baseline=(salesRows||[]).filter(x=>x.id.startsWith('baseline_')&&periodEnd(x)<=julyEnd).sort((a,b)=>periodEnd(b)-periodEnd(a))[0];
   const cutoff=baseline?new Date(periodEnd(baseline)):new Date(weekStartTime().getTime()-1);
   const latest={},previous={};
   (data||[]).sort((a,b)=>new Date(recordTime(b))-new Date(recordTime(a))).forEach(r=>{if(!latest[r.m2])latest[r.m2]=r;if(new Date(recordTime(r))<cutoff&&!previous[r.m2])previous[r.m2]=r});
-  merged=mergeRows(latest);mergedPrevious=mergeRows(previous);render();
+  merged=mergeRows(latest);
+  mergedPrevious=cfg.m2Rows.map(base=>({...base,rep67:Number(base.rep67Initial||0),dist8:0,rep8:0,submitted:false,created_at:null}));
+  render();
 }
 
-function showKpiDelta(id,current,previous,{ratePoint=false}={}){const el=document.getElementById(id);if(!previous||!isFinite(previous)){el.hidden=true;return}const diff=current-previous,arrow=diff>0?'↑':diff<0?'↓':'→';el.className='kpi-delta '+(diff>0?'up':diff<0?'down':'flat');const amount=ratePoint?`${diff>=0?'+':''}${(diff*100).toFixed(1)}pp`:`${diff>=0?'+':''}${Math.round(diff).toLocaleString('zh-CN')}`;el.textContent=`${arrow} ${amount} · 较上月底`;el.hidden=false}
+function showKpiDelta(id,current,previous,{ratePoint=false}={}){const el=document.getElementById(id);if(!previous||!isFinite(previous)){el.hidden=true;return}const diff=current-previous,arrow=diff>0?'↑':diff<0?'↓':'→';el.className='kpi-delta '+(diff>0?'up':diff<0?'down':'flat');const amount=ratePoint?`${diff>=0?'+':''}${(diff*100).toFixed(1)}pp`:`${diff>=0?'+':''}${Math.round(diff).toLocaleString('zh-CN')}`;el.textContent=`${arrow} ${amount} · 较7月底`;el.hidden=false}
 function render(){
   const base67=merged.reduce((a,x)=>a+x.base67,0);
   const rep67=merged.reduce((a,x)=>a+x.rep67,0);
