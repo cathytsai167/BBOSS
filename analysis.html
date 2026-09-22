@@ -39,7 +39,7 @@ function buildRows(salesData,weeklyData,cutoff=null){
   const latest={};
   (weeklyData||[]).forEach(r=>{if(cutoff&&new Date(r.created_at)>cutoff)return;if(!latest[r.m2])latest[r.m2]=r});
   const dist={};
-  M2_BASE.forEach(b=>{const r=latest[b.name],key=distKey(b.name),x=dist[key]||(dist[key]={m3:b.m3,m2:key,distribution:0,repurchase:0,target8:0});x.distribution+=Number(b.base67||0)+Number(r?r.distribution_8:b.dist8Initial||0)+Number(r?r.distribution_9||0:0);x.repurchase+=Number(r?r.repurchase_67:b.rep67Initial||0)+Number(r?r.repurchase_8:b.rep8Initial||0);x.target8+=Number(b.target8||0)});
+  M2_BASE.forEach(b=>{const r=latest[b.name],key=distKey(b.name),x=dist[key]||(dist[key]={m3:b.m3,m2:key,distribution:0,repurchase:0,target8:0}),oldRep=Number(r?r.repurchase_67:b.rep67Initial||0)+Number(r?r.repurchase_8:b.rep8Initial||0);x.distribution+=Number(b.base67||0)+Number(r?r.distribution_8:b.dist8Initial||0)+Number(r?r.distribution_9||0:0);x.repurchase+=r&&Number(r.repurchase_68||0)>0?Number(r.repurchase_68):oldRep;x.target8+=Number(b.target8||0)});
   const sales={};
   salesData.dealers.filter(d=>M3_ORDER.includes(d.m3)).forEach(d=>{const key=salesKey(d.m2),x=sales[key]||(sales[key]={m3:d.m3,m2:key,stw:0,str:0,snow_hl:0,ih_hl:0});x.stw+=d.stw_ytd;x.str+=d.str_ytd;x.snow_hl+=d.snow_hl;x.ih_hl+=d.ih_hl});
   return Object.values(dist).map(d=>{const s=sales[d.m2]||{};return {...d,stw:s.stw||0,str:s.str||0,penetration:s.ih_hl?s.snow_hl/s.ih_hl:null,repurchaseRate:d.distribution?d.repurchase/d.distribution:0,productivity:d.distribution?(s.str||0)/d.distribution:0}});

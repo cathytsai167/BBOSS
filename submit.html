@@ -7,12 +7,11 @@
 </head>
 <body>
 <div class="wrap" style="max-width:720px">
-  <div class="nav"><div><h1>大富豪雪白铺货填报</h1><div class="sub">请更新9月新增铺货售点数；8月数据保持最终值</div></div></div>
+  <div class="nav"><div><h1>大富豪雪白铺货填报</h1><div class="sub">请更新6–8月累计复购家数和9月新增铺货售点数</div></div></div>
   <div class="card" style="padding:18px">
     <div class="field"><label for="m2">M2</label><select id="m2"><option value="">请选择M2</option></select></div>
-    <div class="field"><label for="rep67">6–7月已铺货售点中，累计已复购售点数</label><input id="rep67" type="number" min="0" step="1" inputmode="numeric"><div class="hint">截至当前累计已复购售点数，非本周新增。</div></div>
-    <div class="field"><label for="dist8">8月全月实际铺货售点数</label><input id="dist8" type="number" min="0" step="1" inputmode="numeric"><div class="hint">填写8月1日至8月31日实际新增铺货的售点总数。</div></div>
-    <div class="field"><label for="rep8">8月新增铺货售点中，已复购售点数</label><input id="rep8" type="number" min="0" step="1" inputmode="numeric"><div class="hint">只统计8月新增铺货的售点，不包含6–7月铺货售点；须小于或等于8月全月实际铺货售点数。</div></div>
+    <input id="rep67" type="hidden"><input id="dist8" type="hidden"><input id="rep8" type="hidden">
+    <div class="field"><label for="rep68">6–8月已铺货售点中，累计已复购售点数</label><input id="rep68" type="number" min="0" step="1" inputmode="numeric"><div class="hint">统计6月上市以来至8月底已铺货售点中，当前累计已经复购的售点总数；不是单月新增复购。</div></div>
     <div class="field"><label for="dist9">9月新增铺货售点数</label><input id="dist9" type="number" min="0" step="1" inputmode="numeric"><div class="hint">填写9月1日至当前实际新增铺货的售点数。</div></div>
     <button id="submitBtn" class="primary" type="button">提交最新数据</button>
     <div id="msg" class="msg" aria-live="polite"></div>
@@ -32,22 +31,29 @@ m2.addEventListener('change',async()=>{
   const {data,error}=await client.from('xuebai_weekly').select('*').eq('m2',m2.value).order('created_at',{ascending:false}).limit(1);
   if(error){msg('读取上次填报失败：'+error.message,'err');return}
   const r=(data||[])[0];
-  document.getElementById('rep67').value=r?Number(r.repurchase_67||0):'';
-  document.getElementById('dist8').value=r?Number(r.distribution_8||0):'';
-  document.getElementById('rep8').value=r?Number(r.repurchase_8||0):'';
+  const base=cfg.m2Rows.find(x=>x.name===m2.value);
+  const rep67=r?Number(r.repurchase_67||0):Number(base?.rep67Initial||0);
+  const dist8=r?Number(r.distribution_8||0):Number(base?.dist8Initial||0);
+  const rep8=r?Number(r.repurchase_8||0):Number(base?.rep8Initial||0);
+  document.getElementById('rep67').value=rep67;
+  document.getElementById('dist8').value=dist8;
+  document.getElementById('rep8').value=rep8;
+  document.getElementById('rep68').value=r?Number(r.repurchase_68||0)||(rep67+rep8):(rep67+rep8);
   document.getElementById('dist9').value=r?Number(r.distribution_9||0):0;
-  msg(r?'已带入上次填报，请更新9月新增售点数。':'暂无历史填报，请填写完整数据。');
+  msg(r?'已带入上次填报，请更新6–8月累计复购和9月新增售点。':'暂无历史填报，请填写两项最新数据。');
 });
 document.getElementById('submitBtn').addEventListener('click',async()=>{
   const rep67=Number(document.getElementById('rep67').value);
   const dist8=Number(document.getElementById('dist8').value);
   const rep8=Number(document.getElementById('rep8').value);
+  const rep68=Number(document.getElementById('rep68').value);
   const dist9=Number(document.getElementById('dist9').value);
   if(!m2.value){msg('请选择M2。','err');return}
-  if([rep67,dist8,rep8,dist9].some(v=>!Number.isInteger(v)||v<0)){msg('四个数字都需填写非负整数。','err');return}
+  if([rep67,dist8,rep8,rep68,dist9].some(v=>!Number.isInteger(v)||v<0)){msg('请填写非负整数。','err');return}
   if(rep8>dist8){msg('8月新增售点的复购数不能大于8月全月实际铺货售点数。','err');return}
   const btn=document.getElementById('submitBtn');btn.disabled=true;btn.textContent='提交中...';
-  const {error}=await client.from('xuebai_weekly').insert({m2:m2.value,repurchase_67:rep67,distribution_8:dist8,repurchase_8:rep8,distribution_9:dist9});
+  const base=cfg.m2Rows.find(x=>x.name===m2.value);if(rep68>Number(base?.base67||0)+dist8){msg('6–8月累计复购数不能大于6–8月铺货售点总数。','err');return}
+  const {error}=await client.from('xuebai_weekly').insert({m2:m2.value,repurchase_67:rep67,distribution_8:dist8,repurchase_8:rep8,repurchase_68:rep68,distribution_9:dist9});
   btn.disabled=false;btn.textContent='提交最新数据';
   if(error){msg('提交失败：'+error.message,'err');return}
   msg('提交成功，感谢更新。','ok');
