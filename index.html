@@ -11,7 +11,7 @@
 <body class="is-locked">
 <div id="authGate" class="auth-gate"><h1>Dashboard 登录</h1><p>仅限管理员查看完整数据</p><label for="loginEmail">邮箱</label><input id="loginEmail" type="email" autocomplete="username" placeholder="请输入管理员邮箱"><label for="loginPassword">密码</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="请输入密码"><button id="loginBtn" type="button">登录查看</button><div id="loginMsg" class="auth-msg" aria-live="polite"></div></div>
 <header class="shell"><div class="shell-inner"><div class="topline"><div class="brand"><h1>大富豪雪白新品 Tracking Dashboard</h1><p>铺货执行与销量表现统一追踪</p></div><button id="logoutBtn" class="logout" type="button">退出登录</button></div><nav class="tabs" aria-label="Dashboard模块"><button class="tab active" data-page="sales">销量表现</button><button class="tab" data-page="distribution">铺货进度</button><button class="tab" data-page="analysis">综合分析</button></nav></div></header>
-<main class="viewport"><iframe class="page active" id="sales" src="sales.html" title="销量表现"></iframe><iframe class="page" id="distribution" src="distribution.html" title="铺货进度"></iframe><iframe class="page" id="analysis" src="analysis.html" title="综合分析"></iframe></main>
+<main class="viewport"><iframe class="page active" id="sales" src="sales.html" title="销量表现"></iframe><iframe class="page" id="distribution" src="distribution.html?v=20261013-monthly" title="铺货进度"></iframe><iframe class="page" id="analysis" src="analysis.html?v=20261013-monthly" title="综合分析"></iframe></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const client=supabase.createClient('https://hjuemoaxwotvgvppuits.supabase.co','sb_publishable_kLCQcltuyPsjoM5udpUu4A_8iw1R-oD');
@@ -24,3 +24,4 @@ document.getElementById('logoutBtn').addEventListener('click',async()=>{await cl
 </script>
 </body>
 </html>
+

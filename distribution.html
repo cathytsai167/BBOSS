@@ -1,271 +1,338 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>雪白听铺货追踪</title>
-<link rel="stylesheet" href="styles.css?v=20260811-4">
-<style>
-  .auth-gate{max-width:420px;margin:12vh auto;padding:24px;border-radius:16px;background:#fff;box-shadow:0 12px 36px rgba(25,40,70,.12)}
-  .auth-gate h1{margin:0 0 8px;font-size:24px}.auth-gate p{margin:0 0 18px;color:#6d7788}
-  .auth-gate label{display:block;margin:12px 0 6px;font-weight:700}
-  .auth-gate input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #d9dee8;border-radius:10px;font-size:16px}
-  .auth-gate button{width:100%;margin-top:18px;padding:12px;border:0;border-radius:10px;background:#194f90;color:#fff;font-size:16px;font-weight:700}
-  .auth-gate button:disabled{opacity:.6}.auth-msg{min-height:22px;margin-top:10px;color:#c0392b;font-size:13px}
-  .logout-btn{border:1px solid #d9dee8;border-radius:9px;background:#fff;padding:8px 12px;color:#344054;cursor:pointer}
-  body.is-locked>:not(#authGate):not(script){display:none!important}.kpi-delta{display:none!important;margin-top:8px;padding:5px 8px;border-radius:8px;font-size:12px;font-weight:700}.kpi-delta.up{background:#eaf7f0;color:#217a50}.kpi-delta.down{background:#fff0ef;color:#b43c39}.kpi-delta.flat{background:#f0f2f5;color:#667085}
-  .hero{grid-template-columns:1fr}.totalgrid{grid-template-columns:repeat(3,1fr)}.period-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:800px){.totalgrid,.period-grid{grid-template-columns:1fr}}
-</style>
-</head>
-<body class="is-locked">
-<div id="authGate" class="auth-gate">
-  <h1>Dashboard 登录</h1>
-  <p>仅限管理员查看完整数据</p>
-  <label for="loginEmail">邮箱</label>
-  <input id="loginEmail" type="email" autocomplete="username" placeholder="请输入管理员邮箱">
-  <label for="loginPassword">密码</label>
-  <input id="loginPassword" type="password" autocomplete="current-password" placeholder="请输入密码">
-  <button id="loginBtn" type="button">登录查看</button>
-  <div id="loginMsg" class="auth-msg" aria-live="polite"></div>
-</div>
-<div class="wrap">
-  <div class="nav"><div><h1>雪白听铺货追踪</h1><div class="sub">苏东 JSE · 自动读取 M2 最新填报</div></div><button id="logoutBtn" class="logout-btn" type="button">退出登录</button></div>
-
-  <div class="hero">
-    <div class="totalgrid">
-      <div class="total"><div class="eyebrow">6–8月铺货售点总数</div><div class="big" id="totalDist">—</div><div class="formula" id="totalFormula"></div></div>
-      <div class="total"><div class="eyebrow">6–8月复购售点总数</div><div class="big" id="cumRep">—</div><div class="formula" id="cumRepNote"></div></div>
-      <div class="total"><div class="eyebrow">9月新增售点数</div><div class="big" id="sepDist">—</div><div class="formula">9月当月新增铺货售点</div></div>
-    </div>
-    <div class="period-grid">
-      <div class="period p67"><h2>6–7月｜存量铺货 & 复购</h2><div class="kpis" id="k67"></div></div>
-      <div class="period p8"><h2>8月｜新增铺货 & 复购</h2><div class="kpis" id="k8"></div></div>
-    </div>
-  </div>
-
-  <div class="section">M3 区域表现</div>
-  <div class="m3grid" id="m3grid"></div>
-
-  <div class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-      <strong>M2明细</strong>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <label style="font-size:13px;color:#6d7788">筛选标准：<select id="filter" style="width:auto"><option value="ALL">全部M3</option></select></label>
-        <label style="font-size:13px;color:#6d7788">排序标准：<select id="sort" style="width:auto"><option value="default">默认顺序</option><option value="total">累计铺货</option><option value="p8">8月达成率</option><option value="p9">9月新增铺货</option><option value="r68">6–8月累计复购率</option><option value="r67">6–7月复购率</option><option value="r8">8月复购率</option></select></label>
-        <label style="font-size:13px;color:#6d7788">顺序标准：<select id="sortDir" style="width:auto"><option value="desc">高 → 低</option><option value="asc">低 → 高</option></select></label>
-      </div>
-    </div>
-    <div style="overflow:auto;margin-top:12px">
-      <table>
-        <thead>
-          <tr><th rowspan="2">M3 / M2</th><th colspan="3" class="th67" style="text-align:center">6–7月｜铺货 & 复购</th><th colspan="5" class="th8" style="text-align:center">8月｜新增铺货 & 复购</th><th rowspan="2">6–8月累计复购</th><th rowspan="2">9月新增铺货</th><th rowspan="2">累计铺货</th></tr>
-          <tr><th class="th67">铺货</th><th class="th67">复购</th><th class="th67">复购率</th><th class="th8">目标</th><th class="th8">铺货</th><th class="th8">达成率</th><th class="th8">复购</th><th class="th8">复购率</th></tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <div class="section" style="margin-top:26px">M2周度更新状态 <span class="sub" id="submitCount" style="font-weight:500;margin-left:8px"></span></div>
-  <div class="m3grid" id="statusByM3"></div>
-  <div class="sub" id="refreshTime" style="text-align:right;margin-top:8px"></div>
-
-<script>
-const cfg={
-  supabaseUrl:"https://hjuemoaxwotvgvppuits.supabase.co",
-  supabaseKey:"sb_publishable_kLCQcltuyPsjoM5udpUu4A_8iw1R-oD",
-  m2Rows:[{"m3": "丁点", "name": "黄新军&许艳", "base67": 805, "rep67Initial": 87, "target8": 500, "dist8Initial": 105, "rep8Initial": 0}, {"m3": "丁点", "name": "谢国峰", "base67": 605, "rep67Initial": 61, "target8": 400, "dist8Initial": 132, "rep8Initial": 0}, {"m3": "杨晓超", "name": "蔡芳", "base67": 302, "rep67Initial": 48, "target8": 208, "dist8Initial": 30, "rep8Initial": 0}, {"m3": "杨晓超", "name": "季红州", "base67": 430, "rep67Initial": 72, "target8": 220, "dist8Initial": 42, "rep8Initial": 0}, {"m3": "杨晓超", "name": "梅宇飞", "base67": 152, "rep67Initial": 22, "target8": 110, "dist8Initial": 21, "rep8Initial": 0}, {"m3": "杨晓超", "name": "高凌峰", "base67": 313, "rep67Initial": 56, "target8": 240, "dist8Initial": 50, "rep8Initial": 0}, {"m3": "孟祥杰", "name": "陈永华", "base67": 643, "rep67Initial": 65, "target8": 320, "dist8Initial": 78, "rep8Initial": 0}, {"m3": "孟祥杰", "name": "杭佳琪", "base67": 505, "rep67Initial": 29, "target8": 275, "dist8Initial": 39, "rep8Initial": 0}, {"m3": "孟祥杰", "name": "茅东标", "base67": 276, "rep67Initial": 28, "target8": 100, "dist8Initial": 19, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "是焱彬-姜堰", "base67": 38, "rep67Initial": 1, "target8": 200, "dist8Initial": 45, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "是焱彬-靖江", "base67": 111, "rep67Initial": 0, "target8": 226, "dist8Initial": 114, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "王震-泰兴", "base67": 86, "rep67Initial": 4, "target8": 150, "dist8Initial": 51, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "王震-泰州", "base67": 15, "rep67Initial": 0, "target8": 70, "dist8Initial": 6, "rep8Initial": 0}, {"m3": "肖锡龙", "name": "张雷", "base67": 34, "rep67Initial": 6, "target8": 200, "dist8Initial": 31, "rep8Initial": 0}, {"m3": "杨军", "name": "费燕锋", "base67": 70, "rep67Initial": 0, "target8": 200, "dist8Initial": 24, "rep8Initial": 0}, {"m3": "杨军", "name": "顾彬", "base67": 117, "rep67Initial": 1, "target8": 200, "dist8Initial": 31, "rep8Initial": 0}, {"m3": "杨军", "name": "李海伟", "base67": 89, "rep67Initial": 5, "target8": 260, "dist8Initial": 35, "rep8Initial": 0}, {"m3": "杨军", "name": "刘洲", "base67": 51, "rep67Initial": 0, "target8": 200, "dist8Initial": 30, "rep8Initial": 0}, {"m3": "杨军", "name": "唐启军", "base67": 61, "rep67Initial": 1, "target8": 150, "dist8Initial": 21, "rep8Initial": 0}, {"m3": "杨军", "name": "张旭东", "base67": 68, "rep67Initial": 2, "target8": 200, "dist8Initial": 26, "rep8Initial": 0}]
-};
-const reassignedM3={"蔡芳":"丁点","季红州":"丁点","梅宇飞":"丁点","谢国峰":"孟祥杰","高凌峰":"孟祥杰"};
-cfg.m2Rows.forEach(row=>{if(reassignedM3[row.name])row.m3=reassignedM3[row.name]});
-const client=supabase.createClient(cfg.supabaseUrl,cfg.supabaseKey);
-const fmt=n=>Number(n||0).toLocaleString('zh-CN');
-const pct=(a,b)=>b?((a/b)*100).toFixed(1)+'%':'—';
-const displayTotalDist=(x)=>{
-  // 累计铺货口径统一=6-7月铺货+8月铺货+9月新增铺货
-  return Number(x.base67||0)+Number(x.dist8||0)+Number(x.dist9||0);
-};
-const augDisplayDist=(x)=>{
-  // 8月铺货展示实际提报数，不做6-7月累加
-  return Number(x.dist8||0);
-};
-const augProgress=(x)=>{
-  return x.target8 ? augDisplayDist(x)/x.target8 : 0;
-};
-const isToday=iso=>{
-  if(!iso) return false;
-  const d=new Date(iso), n=new Date();
-  return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate();
-};
-const isThisWeek=iso=>{
-  if(!iso) return false;
-  const now=new Date();
-  const weekStart=new Date(now);
-  const day=(now.getDay()+2)%7;
-  weekStart.setDate(now.getDate()-day);
-  weekStart.setHours(12,0,0,0);
-  if(now<weekStart) weekStart.setDate(weekStart.getDate()-7);
-  return new Date(iso)>=weekStart;
-};
-const shortTime=iso=>{
-  if(!iso) return '暂无';
-  const d=new Date(iso);
-  const p=n=>String(n).padStart(2,'0');
-  return `${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
-};
-const m3Names=[...new Set(cfg.m2Rows.map(x=>x.m3))];
-const filter=document.getElementById('filter');
-const sort=document.getElementById('sort');
-const sortDir=document.getElementById('sortDir');
-m3Names.forEach(x=>{const o=document.createElement('option');o.value=x;o.textContent=x;filter.appendChild(o)});
-
-let merged=[],mergedPrevious=[];
-
-const weekStartTime=()=>{const now=new Date(),start=new Date(now),day=(now.getDay()+2)%7;start.setDate(now.getDate()-day);start.setHours(12,0,0,0);if(now<start)start.setDate(start.getDate()-7);return start};
-const recordTime=r=>r&&(r.updated_at||r.created_at);
-const mergeRows=latest=>cfg.m2Rows.map(base=>{const r=latest[base.name],submittedAt=recordTime(r),rep67=r?Number(r.repurchase_67):Number(base.rep67Initial||0),rep8=r?Number(r.repurchase_8):Number(base.rep8Initial||0);return {...base,rep67,dist8:r?Number(r.distribution_8):Number(base.dist8Initial||0),rep8,rep68:r&&Number(r.repurchase_68||0)>0?Number(r.repurchase_68):rep67+rep8,dist9:r?Number(r.distribution_9||0):0,submitted:!!r&&isThisWeek(submittedAt),created_at:submittedAt}});
-async function load(){
-  const {data,error}=await client.from('xuebai_weekly').select('*').order('created_at',{ascending:false});
-  if(error){document.getElementById('refreshTime').textContent='读取失败：'+error.message;return}
-  const {data:salesRows}=await client.from('sales_dashboard_data').select('id,payload');
-  const currentRow=(salesRows||[]).find(x=>x.id==='current');
-  const periodEnd=row=>Math.max(new Date(row.payload.period.stw_max+'T23:59:59').getTime(),new Date(row.payload.period.str_max+'T23:59:59').getTime());
-  const currentEnd=currentRow?periodEnd(currentRow):Date.now();
-  const julyEnd=new Date('2026-07-31T23:59:59').getTime();
-  const baseline=(salesRows||[]).filter(x=>x.id.startsWith('baseline_')&&periodEnd(x)<=julyEnd).sort((a,b)=>periodEnd(b)-periodEnd(a))[0];
-  const cutoff=baseline?new Date(periodEnd(baseline)):new Date(weekStartTime().getTime()-1);
-  const latest={},previous={};
-  (data||[]).sort((a,b)=>new Date(recordTime(b))-new Date(recordTime(a))).forEach(r=>{if(!latest[r.m2])latest[r.m2]=r;if(new Date(recordTime(r))<cutoff&&!previous[r.m2])previous[r.m2]=r});
-  merged=mergeRows(latest);
-  mergedPrevious=cfg.m2Rows.map(base=>({...base,rep67:Number(base.rep67Initial||0),dist8:0,rep8:0,rep68:Number(base.rep67Initial||0),dist9:0,submitted:false,created_at:null}));
-  render();
-}
-
-function showKpiDelta(id,current,previous,{ratePoint=false}={}){const el=document.getElementById(id);if(!previous||!isFinite(previous)){el.hidden=true;return}const diff=current-previous,arrow=diff>0?'↑':diff<0?'↓':'→';el.className='kpi-delta '+(diff>0?'up':diff<0?'down':'flat');const amount=ratePoint?`${diff>=0?'+':''}${(diff*100).toFixed(1)}pp`:`${diff>=0?'+':''}${Math.round(diff).toLocaleString('zh-CN')}`;el.textContent=`${arrow} ${amount} · 较7月底`;el.hidden=false}
-function render(){
-  const base67=merged.reduce((a,x)=>a+x.base67,0);
-  const rep67=merged.reduce((a,x)=>a+x.rep67,0);
-  const target8=merged.reduce((a,x)=>a+x.target8,0);
-  const dist8=merged.reduce((a,x)=>a+x.dist8,0);
-  const rep8=merged.reduce((a,x)=>a+x.rep8,0);
-  const dist9=merged.reduce((a,x)=>a+x.dist9,0);
-  const dist68=base67+dist8,totalRep=merged.reduce((a,x)=>a+x.rep68,0);
-  const totalDist=merged.reduce((a,x)=>a+displayTotalDist(x),0);
-  document.getElementById('totalDist').textContent=fmt(dist68);
-  document.getElementById('totalFormula').textContent=`6–7月 ${fmt(base67)} ｜ 8月新增 ${fmt(dist8)}`;
-  document.getElementById('cumRep').textContent=fmt(totalRep);
-  document.getElementById('cumRepNote').textContent=`截至8月底累计已复购售点`;
-  document.getElementById('sepDist').textContent=fmt(dist9);
-
-  document.getElementById('k67').innerHTML=[
-    ['已铺货',fmt(base67),'售点'],['已复购',fmt(rep67),'售点'],['复购率',pct(rep67,base67),'6–7月累计']
-  ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div>${x[3]||''}</div>`).join('');
-  document.getElementById('k8').innerHTML=[
-    ['目标',fmt(target8),'售点',''],['已铺货',fmt(dist8),'售点',''],['达成率',pct(dist8,target8),'8月新增','']
-  ].map(x=>`<div class="kpi"><div class="lab">${x[0]}</div><div class="val">${x[1]}</div><div class="note">${x[2]}</div>${x[3]||''}</div>`).join('');
-
-  const doneWeek=merged.filter(x=>x.submitted).length;
-  document.getElementById('submitCount').textContent=`苏东 TTL：${doneWeek}/${merged.length} 已更新`;
-  document.getElementById('refreshTime').textContent='页面刷新时间：'+new Date().toLocaleString('zh-CN',{hour12:false});
-  document.getElementById('statusByM3').innerHTML=m3Names.map(m3=>{
-    const xs=merged.filter(x=>x.m3===m3);
-    const d=xs.filter(x=>x.submitted).length;
-    return `<div class="m3" style="padding:14px">
-      <div class="m3head" style="margin-bottom:8px">${m3}<span style="float:right;font-size:13px;color:#6d7788">${d}/${xs.length} 已更新</span></div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        ${xs.map(x=>{
-          const updated=x.submitted;
-          return `<span style="font-size:12px;padding:4px 7px;border-radius:8px;background:${updated?'#eef8f1':'#fff1f1'}">
-            <span>${x.name}</span>
-            <b class="${updated?'today':'stale'}">${updated?'已更新':'待更新'}</b>
-            <span class="timechip">${updated?shortTime(x.created_at):(x.created_at?'上次 '+shortTime(x.created_at):'暂无更新')}</span>
-          </span>`;
-        }).join('')}
-      </div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('m3grid').innerHTML=m3Names.map(m3=>{
-    const xs=merged.filter(x=>x.m3===m3);
-    const b=xs.reduce((a,x)=>a+x.base67,0),r=xs.reduce((a,x)=>a+x.rep67,0),t=xs.reduce((a,x)=>a+x.target8,0),d=xs.reduce((a,x)=>a+x.dist8,0),r8=xs.reduce((a,x)=>a+x.rep8,0),r68=xs.reduce((a,x)=>a+x.rep68,0);
-    const d9=xs.reduce((a,x)=>a+x.dist9,0);
-    return `<div class="m3"><div class="m3head">${m3}<span style="float:right;color:#6d7788;font-size:12px">6–8月复购 ${fmt(r68)}｜9月新增 ${fmt(d9)}</span></div><div class="split">
-      <div class="block"><div class="tag">6–7月</div><div class="row"><span>铺货</span><b>${fmt(b)}</b></div><div class="row"><span>复购</span><b>${fmt(r)}</b></div><div class="row"><span>复购率</span><b>${pct(r,b)}</b></div><div class="bar" style="margin:5px 0 0"><div class="fill67" style="width:${Math.min((r/b||0)*100,100)}%"></div></div></div>
-      <div class="block"><div class="tag">8月</div><div class="row"><span>目标</span><b>${fmt(t)}</b></div><div class="row"><span>铺货</span><b>${fmt(d)}</b></div><div class="row"><span>达成率</span><b>${pct(d,t)}</b></div><div class="bar" style="margin:5px 0 8px"><div class="fill8" style="width:${Math.min((d/t||0)*100,100)}%"></div></div></div>
-    </div></div>`;
-  }).join('');
-  renderTable();
-}
-
-function renderTable(){
-  const f=filter.value;
-  let rows=(f==='ALL'?merged:merged.filter(x=>x.m3===f)).slice();
-  const s=sort.value;
-  const rate=(x,type)=>{
-    if(type==='p8') return x.target8?x.dist8/x.target8:0;
-    if(type==='p9') return Number(x.dist9||0);
-    if(type==='r68') return (x.base67+x.dist8)?x.rep68/(x.base67+x.dist8):0;
-    if(type==='total') return Number(displayTotalDist(x));
-    if(type==='r67') return x.base67?x.rep67/x.base67:0;
-    if(type==='r8') return x.dist8?x.rep8/x.dist8:0;
-    return 0;
-  };
-  if(s!=='default'){
-    const dir=sortDir.value;
-    rows.sort((a,b)=>dir==='desc'?rate(b,s)-rate(a,s):rate(a,s)-rate(b,s));
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>雪白听铺货追踪</title><style>:root{--blue:#174d8c;--green:#216b4d;--muted:#64748b}*{box-sizing:border-box}body{margin:0;background:#f5f7fb;color:#21314a;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif}main{max-width:1580px;margin:0 auto;padding:28px}header{display:flex;justify-content:space-between;align-items:center;gap:18px;background:white;border-top:6px solid #bd4242;border-radius:16px;padding:24px;margin-bottom:18px}h1{font-size:30px;color:var(--blue);margin:0}h2{font-size:21px;margin:0 0 16px}header p{margin:6px 0 0;color:var(--muted)}a{color:var(--blue);text-decoration:none;font-weight:650}.card{background:#fff;border-radius:14px;padding:22px;margin-bottom:20px;box-shadow:0 4px 18px #233c6810}.preview{padding:12px 16px;background:#fff5df;border:1px solid #eed7a6;border-radius:10px;margin-bottom:20px;color:#89601c;font-size:14px}.toolbar,.sort,.section-head{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.toolbar span{margin-left:auto;color:var(--muted)}input,select{font:inherit;padding:10px 12px;border:1px solid #d9e2ec;border-radius:9px;background:white;color:#21314a}label{font-weight:600}button{background:var(--blue);color:white;border:0;border-radius:9px;padding:12px 20px;font:inherit;font-weight:650;cursor:pointer}button.secondary{background:#edf3fa;color:var(--blue)}button:disabled{opacity:.5;cursor:wait}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.metrics p{margin:0;color:var(--muted)}.metrics strong{display:block;font-size:40px;color:var(--blue);margin:6px 0}.metrics article:nth-child(2) strong{color:var(--green)}small{display:block;color:var(--muted);font-size:13px}.hint{color:var(--muted);font-size:14px;margin:8px 0 14px}.form{max-width:780px;margin:0 auto 20px}.field{margin-bottom:22px}.field label{display:block;margin-bottom:7px}.field input,.field select{width:100%}[hidden]{display:none!important}.guide{max-width:780px;margin:0 auto}.regions{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.region strong{color:var(--blue);font-size:24px}.region p{display:flex;justify-content:space-between;margin:8px 0}.section-head{justify-content:space-between}.table-scroll{overflow:auto;max-height:640px}table{width:100%;min-width:1120px;border-spacing:0}th,td{padding:14px 12px;text-align:right;border-bottom:1px solid #e7edf5;white-space:nowrap}th{position:sticky;top:0;background:#e9f0f8;color:var(--blue);z-index:2}th:first-child,td:first-child{text-align:left}td:nth-child(4){background:#f0f5fc;font-weight:650;color:var(--blue)}td:nth-child(5){color:var(--green)}.tag{padding:4px 8px;border-radius:6px;font-size:13px;background:#fff2d7;color:#916620}.tag.ok{background:#e7f4ed;color:var(--green)}.trend-row{display:grid;grid-template-columns:120px 1fr 180px;align-items:center;gap:18px;margin:16px 0}.track{height:20px;background:#edf2f8;border-radius:5px;overflow:hidden}.fill{height:100%;background:#3479b9;border-radius:5px}.rate-track{height:5px;background:#e8f0ed;margin-top:5px}.rate-fill{height:100%;background:#42966e}.error{color:#b63b3b}.success{color:var(--green)}@media(max-width:1000px){.metrics,.regions{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){main{padding:14px}header{display:block}header a{display:block;margin-top:15px}.metrics,.regions{grid-template-columns:1fr}.trend-row{grid-template-columns:75px 1fr 105px;gap:10px}.metrics strong{font-size:34px}.toolbar span{margin-left:0}}
+</style></head><body><main>
+<header><div><h1>雪白听铺货追踪</h1><p>累计概览 · 月内周度更新 · 历史月份回看</p></div><a href="submit.html">填写最新数据 →</a></header>
+<div class="preview">正在读取最新提报…</div>
+<div class="toolbar card"><label>查看月份 <input id="month" type="month" min="2026-10"></label><label>M3 <select id="filter"><option value="">全部</option></select></label><span id="coverage"></span><button id="refresh" class="secondary">刷新</button></div>
+<div class="metrics"><article class="card"><p>累计铺货售点</p><strong id="total">—</strong><small id="totalNote"></small></article><article class="card"><p>累计已复购售点</p><strong id="repTotal">—</strong><small id="repNote"></small></article><article class="card"><p>累计复购率</p><strong id="rate">—</strong><small>已复购 / 已铺货 · 按同一批已提报M2计算</small></article><article class="card"><p>本月累计新增铺货</p><strong id="newTotal">—</strong><small id="newNote"></small></article></div>
+<section><h2>M3区域表现</h2><div id="regions" class="regions"></div></section>
+<section class="card"><div class="section-head"><h2>M2明细</h2><div class="sort"><label>M3筛选 <select id="m2Filter"><option value="">全部M3</option></select></label><label>排序标准 <select id="sort"><option value="default">M3 / M2默认顺序</option><option value="total">累计铺货</option><option value="rep">累计已复购</option><option value="new">本月新增铺货</option><option value="rate">累计复购率</option></select></label><label>顺序 <select id="direction"><option value="desc">高 → 低</option><option value="asc">低 → 高</option></select></label></div></div>
+<div class="table-scroll"><table><thead><tr><th>M3 / M2</th><th>9月底最终铺货</th><th>本月累计新增</th><th>累计铺货</th><th>累计已复购</th><th>累计复购率</th><th>本周状态</th><th>数据截止日</th></tr></thead><tbody id="rows"></tbody></table></div>
+<p class="hint">每周五12:00（北京时间）进入新一轮“待更新”。补报9月底最终数不计作当月周度更新。累计指标需要9月底基数及此前各月数据齐全，缺报不按0处理。</p></section>
+</main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>window.XUEBAI_CONFIG = {
+  supabaseUrl: "https://hjuemoaxwotvgvppuits.supabase.co",
+  supabaseKey: "sb_publishable_kLCQcltuyPsjoM5udpUu4A_8iw1R-oD",
+  m2Rows: [
+  {
+    "m3": "丁点",
+    "name": "黄新军&许艳",
+    "base67": 805,
+    "rep67Initial": 87,
+    "target8": 500,
+    "dist8Initial": 105,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "孟祥杰",
+    "name": "谢国峰",
+    "base67": 605,
+    "rep67Initial": 61,
+    "target8": 400,
+    "dist8Initial": 132,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "丁点",
+    "name": "蔡芳",
+    "base67": 302,
+    "rep67Initial": 48,
+    "target8": 208,
+    "dist8Initial": 30,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "丁点",
+    "name": "季红州",
+    "base67": 430,
+    "rep67Initial": 72,
+    "target8": 220,
+    "dist8Initial": 42,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "丁点",
+    "name": "梅宇飞",
+    "base67": 152,
+    "rep67Initial": 22,
+    "target8": 110,
+    "dist8Initial": 21,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "孟祥杰",
+    "name": "高凌峰",
+    "base67": 313,
+    "rep67Initial": 56,
+    "target8": 240,
+    "dist8Initial": 50,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "孟祥杰",
+    "name": "陈永华",
+    "base67": 643,
+    "rep67Initial": 65,
+    "target8": 320,
+    "dist8Initial": 78,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "孟祥杰",
+    "name": "杭佳琪",
+    "base67": 505,
+    "rep67Initial": 29,
+    "target8": 275,
+    "dist8Initial": 39,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "孟祥杰",
+    "name": "茅东标",
+    "base67": 276,
+    "rep67Initial": 28,
+    "target8": 100,
+    "dist8Initial": 19,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "肖锡龙",
+    "name": "是焱彬-姜堰",
+    "base67": 38,
+    "rep67Initial": 1,
+    "target8": 200,
+    "dist8Initial": 45,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "肖锡龙",
+    "name": "是焱彬-靖江",
+    "base67": 111,
+    "rep67Initial": 0,
+    "target8": 200,
+    "dist8Initial": 114,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "肖锡龙",
+    "name": "王震-泰兴",
+    "base67": 86,
+    "rep67Initial": 4,
+    "target8": 150,
+    "dist8Initial": 51,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "肖锡龙",
+    "name": "王震-泰州",
+    "base67": 15,
+    "rep67Initial": 0,
+    "target8": 70,
+    "dist8Initial": 6,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "肖锡龙",
+    "name": "张雷",
+    "base67": 34,
+    "rep67Initial": 6,
+    "target8": 200,
+    "dist8Initial": 31,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "杨军",
+    "name": "费燕锋",
+    "base67": 70,
+    "rep67Initial": 0,
+    "target8": 200,
+    "dist8Initial": 24,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "杨军",
+    "name": "顾彬",
+    "base67": 117,
+    "rep67Initial": 1,
+    "target8": 200,
+    "dist8Initial": 31,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "杨军",
+    "name": "李海伟",
+    "base67": 89,
+    "rep67Initial": 5,
+    "target8": 260,
+    "dist8Initial": 35,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "杨军",
+    "name": "刘洲",
+    "base67": 51,
+    "rep67Initial": 0,
+    "target8": 200,
+    "dist8Initial": 30,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "杨军",
+    "name": "唐启军",
+    "base67": 61,
+    "rep67Initial": 1,
+    "target8": 150,
+    "dist8Initial": 21,
+    "rep8Initial": 0
+  },
+  {
+    "m3": "杨军",
+    "name": "张旭东",
+    "base67": 68,
+    "rep67Initial": 2,
+    "target8": 200,
+    "dist8Initial": 26,
+    "rep8Initial": 0
   }
-  document.getElementById('tbody').innerHTML=rows.map(x=>{
-    const r67=x.base67?x.rep67/x.base67:0,p8=x.target8?x.dist8/x.target8:0,r8=x.dist8?x.rep8/x.dist8:0;
-    return `<tr>
-      <td>${x.m3} / ${x.name}</td>
-      <td class="td67">${fmt(x.base67)}</td>
-      <td class="td67">${fmt(x.rep67)}</td>
-      <td class="td67">${pct(x.rep67,x.base67)}<div class="minibar"><div class="miniblue" style="width:${Math.min(r67*100,100)}%"></div></div></td>
-      <td class="td8">${fmt(x.target8)}</td>
-      <td class="td8">${fmt(augDisplayDist(x))}</td>
-      <td class="td8">${pct(augDisplayDist(x),x.target8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(p8*100,100)}%;opacity:${p8>=0.5?1:(p8>=0.2?0.75:0.45)}"></div></div></td>
-      <td class="td8">${fmt(x.rep8)}</td>
-      <td class="td8">${pct(x.rep8,x.dist8)}<div class="minibar"><div class="minigreen" style="width:${Math.min(r8*100,100)}%"></div></div></td>
-      <td>${fmt(x.rep68)}</td>
-      <td>${fmt(x.dist9)}</td>
-      <td class="totaltd">${fmt(displayTotalDist(x))}</td>
-    </tr>`;
-  }).join('');
+]
+};
+</script><script>/* 独立预览：仅本机演示存储，不连接或写入Supabase。 */
+const STORAGE='xuebai-monthly-preview-v1';
+const LIVE=true;
+let remoteRecords=[],legacyRecords=[];
+let api=null;
+const bases=window.XUEBAI_CONFIG.m2Rows;
+const M3=['丁点','孟祥杰','肖锡龙','杨军'];
+const el=id=>document.getElementById(id);
+const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>n==null?'—':Number(n).toLocaleString('zh-CN');
+const pct=(a,b)=>a==null||!b?'—':(a/b*100).toFixed(1)+'%';
+const today=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+const currentMonth=()=>today().slice(0,7);
+function monthList(end){let result=[];for(let m='2026-10';m<=end;){result.push(m);let [y,n]=m.split('-').map(Number);n++;if(n===13){n=1;y++}m=`${y}-${String(n).padStart(2,'0')}`}return result}
+function cycleStart(now=new Date()){let c=new Date(now.getTime()+8*3600000);const day=(c.getUTCDay()+2)%7;c.setUTCDate(c.getUTCDate()-day);c.setUTCHours(12,0,0,0);if(c.getTime()>now.getTime()+8*3600000)c.setUTCDate(c.getUTCDate()-7);return c.getTime()-8*3600000}
+function seed(){return bases.flatMap((b,i)=>{
+  if(i===bases.length-1)return []; // 故意保留缺报，检查空值展示。
+  const baseline=b.base67+b.dist8Initial+12+i*3;
+  const rep=b.rep67Initial+9+i;
+  const arr=[{m2:b.name,kind:'baseline',month:'2026-09',as_of:'2026-09-30',distribution:baseline,repurchase:rep,created_at:'2026-10-01T08:00:00Z'}];
+  if(i%5!==0)arr.push({m2:b.name,kind:'monthly',month:currentMonth(),as_of:today(),distribution:15+i*2,repurchase:rep+7+i,created_at:new Date().toISOString()});
+  return arr;
+})}
+function readRecords(){if(LIVE)return remoteRecords;try{const x=localStorage.getItem(STORAGE);return x?JSON.parse(x):seed()}catch{return seed()}}
+function latest(records,m2,kind,month){return records.filter(r=>r.m2===m2&&r.kind===kind&&r.month===month).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0]||null}
+function baselinePrefill(records,m2){
+  const confirmed=latest(records,m2,'baseline','2026-09');
+  if(confirmed)return {...confirmed,fromLegacy:false};
+  const previous=legacyRecords.filter(r=>r.m2===m2).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0];
+  const base=bases.find(b=>b.name===m2);
+  if(!previous||!base)return null;
+  const n=v=>v==null?null:Number(v);
+  const dist8=n(previous.distribution_8),dist9=n(previous.distribution_9);
+  const rep68=n(previous.repurchase_68),rep67=n(previous.repurchase_67),rep8=n(previous.repurchase_8);
+  return {distribution:dist8!=null&&dist9!=null?Number(base.base67||0)+dist8+dist9:null,
+    repurchase:rep68??(rep67!=null&&rep8!=null?rep67+rep8:null),fromLegacy:true};
 }
-filter.addEventListener('change',renderTable);
-sort.addEventListener('change',renderTable);
-sortDir.addEventListener('change',renderTable);
-
-async function unlockDashboard(){
-  document.body.classList.remove('is-locked');
-  document.getElementById('authGate').hidden=true;
-  await load();
+function buildRows(records,month){return bases.map(b=>{
+  const baseline=latest(records,b.name,'baseline','2026-09');
+  const current=latest(records,b.name,'monthly',month);
+  const months=monthList(month);const reports=months.map(m=>latest(records,b.name,'monthly',m));
+  const complete=!!baseline&&reports.every(Boolean);
+  const total=complete?baseline.distribution+reports.reduce((a,r)=>a+r.distribution,0):null;
+  const rep=current?current.repurchase:null;
+  return {name:b.name,m3:b.m3,baseline:baseline?.distribution??null,total,rep,new:current?.distribution??null,rate:total&&rep!=null?rep/total:null,as_of:current?.as_of??null,updated:month===currentMonth()&&!!current&&new Date(current.created_at).getTime()>=cycleStart(),complete,baselineRecord:baseline,current};
+})}
+function totals(rows){const complete=rows.filter(x=>x.complete&&x.rep!=null);return {total:complete.length?complete.reduce((a,x)=>a+x.total,0):null,rep:complete.length?complete.reduce((a,x)=>a+x.rep,0):null,new:rows.some(x=>x.new!=null)?rows.reduce((a,x)=>a+(x.new??0),0):null,n:complete.length}}
+function setupSubmit(){
+  el('month').value=currentMonth();el('month').max=currentMonth();
+  bases.forEach(b=>el('m2').add(new Option(b.name,b.name)));
+  el('asOf').value=today();
+  const baselineFlag=new URLSearchParams(location.search).get('baseline');
+  const includeBaseline=baselineFlag==='1'||(baselineFlag!=='0'&&new Date()<new Date('2026-10-16T04:00:00Z'));
+  // 本周专用链接加baseline=1；之后普通链接只呈现两项月内更新。
+  function prefill(){el('msg').textContent='';const records=readRecords();const base=latest(records,el('m2').value,'baseline','2026-09');const brought=baselinePrefill(records,el('m2').value);const r=latest(records,el('m2').value,'monthly',el('month').value);
+    el('baselineFields').hidden=!(includeBaseline||(el('m2').value&&!base));
+    el('baseDist').value=brought?.distribution??'';el('baseRep').value=brought?.repurchase??'';
+    el('dist').value=r?.distribution??'';el('rep').value=r?.repurchase??'';
+    el('last').textContent=r?'已带入上次填写，请更新。':'';
+    if(el('m2').value&&!base&&!includeBaseline)el('last').textContent='请一并补齐9月底最终数。';
+    el('basePrefillNote').textContent=brought?(brought.fromLegacy?'已带入上次填写。复购旧口径为6–8月，请核对并补齐9月底最终数。':'已带入上次填写的9月底最终数，请核对。'):'';
+  }
+  el('m2').addEventListener('change',prefill);el('month').addEventListener('change',()=>{const m=el('month').value;if(!m)return;el('asOf').value=m===currentMonth()?today():new Date(Date.UTC(Number(m.slice(0,4)),Number(m.slice(5,7)),0)).toISOString().slice(0,10);prefill()});
+  el('submit').addEventListener('click',async()=>{const month=el('month').value;const as_of=el('asOf').value;const records=readRecords();const m2=el('m2').value;
+    const fail=t=>{el('msg').textContent=t;el('msg').className='error'};
+    if(!m2)return fail('请选择M2。');if(!month||month<'2026-10'||month>currentMonth())return fail('请选择有效的提报月份。');
+    if(!as_of||as_of.slice(0,7)!==month||as_of>today())return fail('截止日期须在提报月份内，且不能晚于今天。');
+    if(el('dist').value===''||el('rep').value==='')return fail('两项数字都需要填写，实际为0时请填写0。');
+    const distribution=Number(el('dist').value),repurchase=Number(el('rep').value);
+    if([distribution,repurchase].some(n=>!Number.isSafeInteger(n)||n<0))return fail('请填写非负整数。');
+    const prev=latest(records,m2,'monthly',month);if(prev&&as_of<prev.as_of)return fail('截止日期不能早于本期已保存的截止日期。');
+    const existingBase=latest(records,m2,'baseline','2026-09');
+    const withBaseline=!el('baselineFields').hidden;
+    const baseDist=withBaseline?Number(el('baseDist').value):existingBase?.distribution;
+    const baseRep=withBaseline?Number(el('baseRep').value):existingBase?.repurchase;
+    if(withBaseline&&(el('baseDist').value===''||el('baseRep').value===''))return fail('请填写9月底最终铺货和复购两项数字。');
+    if([baseDist,baseRep].some(n=>!Number.isSafeInteger(n)||n<0))return fail('9月底最终数请填写非负整数。');
+    if(baseRep>baseDist)return fail('9月底复购数不能超过9月底铺货数。');
+    const earlier=monthList(month).filter(m=>m<month).map(m=>latest(records,m2,'monthly',m));if(earlier.some(r=>!r))return fail('请先补齐此前月份的新增铺货数。');
+    const total=baseDist+earlier.reduce((a,r)=>a+r.distribution,0)+distribution;
+    if(repurchase>total)return fail('累计复购售点不能超过累计铺货售点。');
+    const chronological=records.filter(r=>r.m2===m2&&r.as_of<=as_of).sort((a,b)=>b.as_of.localeCompare(a.as_of)||new Date(b.created_at)-new Date(a.created_at))[0];
+    const decreased=(prev&&distribution<prev.distribution)||(chronological&&repurchase<chronological.repurchase)||repurchase<baseRep||(withBaseline&&existingBase&&(baseDist<existingBase.distribution||baseRep<existingBase.repurchase));
+    if(decreased&&!window.confirm('填写的售点数低于之前记录，确认以本次数值更新？'))return;
+    const timestamp=new Date().toISOString();
+    const additions=[];
+    if(withBaseline)additions.push({m2,kind:'baseline',month:'2026-09',as_of:'2026-09-30',distribution:baseDist,repurchase:baseRep,note:'',created_at:timestamp});
+    additions.push({m2,kind:'monthly',month,as_of,distribution,repurchase,note:'',created_at:timestamp});
+    if(withBaseline){const prospective=[...records,...additions];for(const r of prospective.filter(r=>r.m2===m2&&r.kind==='monthly')){const history=monthList(r.month).map(m=>latest(prospective,m2,'monthly',m));if(history.every(Boolean)&&r.repurchase>baseDist+history.reduce((a,x)=>a+x.distribution,0)&&r===latest(prospective,m2,'monthly',r.month))return fail('此基数会导致后续月份复购超过铺货，请先核对后续记录。')}}
+    if(LIVE){
+      const prior=legacyRecords.filter(r=>r.m2===m2).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0];
+      const base=bases.find(b=>b.name===m2);
+      const legacy={repurchase_67:prior?.repurchase_67??base.rep67Initial??0,distribution_8:prior?.distribution_8??base.dist8Initial??0,repurchase_8:prior?.repurchase_8??base.rep8Initial??0,repurchase_68:prior?.repurchase_68??((prior?.repurchase_67??base.rep67Initial??0)+(prior?.repurchase_8??base.rep8Initial??0)),distribution_9:prior?.distribution_9??0};
+      el('submit').disabled=true;
+      try{
+        const {error}=await api.from('xuebai_weekly').insert(additions.map(r=>({...legacy,m2,report_kind:r.kind,report_month:r.month+'-01',report_date:r.as_of,monthly_distribution:r.kind==='monthly'?r.distribution:null,baseline_distribution:r.kind==='baseline'?r.distribution:null,cumulative_repurchase:r.repurchase,report_note:r.note})));
+        if(error)throw error;
+        await loadRemote();el('msg').textContent='提交成功，已保存本期数据。';el('msg').className='success';
+      }catch(error){fail('提交失败：'+error.message)}finally{el('submit').disabled=false}
+      return;
+    }
+    records.push(...additions);
+    try{localStorage.setItem(STORAGE,JSON.stringify(records));el('msg').textContent='预览提报已保存，可打开铺货页查看。未提交到线上。';el('msg').className='success'}catch{fail('浏览器不允许本地存储，请换用同一浏览器打开这两页。')}
+  });prefill();
 }
-
-async function startAuth(){
-  const {data}=await client.auth.getSession();
-  if(data.session){await unlockDashboard();return}
-  const loginBtn=document.getElementById('loginBtn');
-  const loginMsg=document.getElementById('loginMsg');
-  const signIn=async()=>{
-    const email=document.getElementById('loginEmail').value.trim();
-    const password=document.getElementById('loginPassword').value;
-    if(!email||!password){loginMsg.textContent='请输入邮箱和密码。';return}
-    loginBtn.disabled=true;loginBtn.textContent='登录中…';loginMsg.textContent='';
-    const {error}=await client.auth.signInWithPassword({email,password});
-    loginBtn.disabled=false;loginBtn.textContent='登录查看';
-    if(error){loginMsg.textContent='登录失败，请检查邮箱或密码。';return}
-    await unlockDashboard();
-  };
-  loginBtn.addEventListener('click',signIn);
-  document.getElementById('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter') signIn()});
+function setupDashboard(){el('month').value=currentMonth();el('month').max=currentMonth();M3.forEach(m=>{el('filter').add(new Option(m,m));el('m2Filter').add(new Option(m,m))});
+  function render(){const month=el('month').value;if(!month||month<'2026-10'||month>currentMonth())return;const records=readRecords();let rows=buildRows(records,month).filter(r=>!el('filter').value||r.m3===el('filter').value);const t=totals(rows),updated=rows.filter(x=>x.current).length;
+    el('coverage').textContent=`本月已提报 ${updated}/${rows.length} · 9月底基数已确认 ${rows.filter(r=>r.baseline!=null).length}/${rows.length}`;
+    el('total').textContent=fmt(t.total);el('repTotal').textContent=fmt(t.rep);el('rate').textContent=pct(t.rep,t.total);el('newTotal').textContent=fmt(t.new);
+    el('totalNote').textContent=`9月底基数 + 各月新增 · 完整数据 ${t.n}/${rows.length} 个M2`;
+    el('repNote').textContent=`所选月最新累计值 · 同口径 ${t.n}/${rows.length} 个M2`;
+    const dates=rows.map(r=>r.as_of).filter(Boolean).sort();el('newNote').textContent=dates.length?`已报 ${updated}/${rows.length} · 截止日 ${dates[0]}～${dates.at(-1)}`:'待更新';
+    el('regions').innerHTML=M3.filter(m=>!el('filter').value||m===el('filter').value).map(m=>{const rs=rows.filter(x=>x.m3===m),s=totals(rs);return `<article class="card region"><h2>${escapeHtml(m)}</h2><p>累计铺货 <strong>${fmt(s.total)}</strong></p><p>累计复购 <b>${fmt(s.rep)}</b></p><p>区域售点复购率 <b>${pct(s.rep,s.total)}</b></p><div class="rate-track"><div class="rate-fill" style="width:${Math.min(100,(s.total?s.rep/s.total:0)*100)}%"></div></div><p>本月新增 <b>${fmt(s.new)}</b></p><small>完整 ${s.n}/${rs.length} · 已提报 ${rs.filter(r=>r.current).length}/${rs.length}</small></article>`}).join('');
+    rows=rows.filter(r=>!el('m2Filter').value||r.m3===el('m2Filter').value);
+    if(el('sort').value!=='default'){const key=el('sort').value,dir=el('direction').value==='asc'?1:-1;rows.sort((a,b)=>a[key]==null?b[key]==null?0:1:b[key]==null?-1:dir*(a[key]-b[key]))}else rows.sort((a,b)=>M3.indexOf(a.m3)-M3.indexOf(b.m3)||bases.findIndex(x=>x.name===a.name)-bases.findIndex(x=>x.name===b.name));
+    el('rows').innerHTML=rows.map(r=>`<tr><td>${escapeHtml(r.m3)} / ${escapeHtml(r.name)}</td><td>${fmt(r.baseline)}</td><td>${fmt(r.new)}</td><td>${fmt(r.total)}</td><td>${fmt(r.rep)}</td><td>${pct(r.rep,r.total)}<div class="rate-track"><div class="rate-fill" style="width:${Math.min(100,(r.rate||0)*100)}%"></div></div></td><td><span class="tag ${r.updated?'ok':''}">${month===currentMonth()?r.updated?'已更新':'待更新':r.current?'已提报':'未提报'}</span></td><td>${r.as_of||'—'}</td></tr>`).join('');
+  }['month','filter','m2Filter','sort','direction'].forEach(id=>el(id).addEventListener('change',render));el('refresh').addEventListener('click',async()=>{if(LIVE){try{await loadRemote()}catch(e){el('coverage').textContent='读取失败：'+e.message;return}}render()});window.addEventListener('storage',render);render();
 }
-
-document.getElementById('logoutBtn').addEventListener('click',async()=>{
-  await client.auth.signOut();
-  location.reload();
-});
-startAuth();
-</script>
-</body></html>
+async function loadRemote(){
+  const all=[];
+  for(let start=0;;start+=500){const {data,error}=await api.from('xuebai_weekly').select('*').order('created_at',{ascending:false}).range(start,start+499);if(error)throw error;all.push(...(data||[]));if(!data||data.length<500)break}
+  legacyRecords=all;
+  remoteRecords=legacyRecords.filter(r=>r.report_kind&&r.report_month).map(r=>({m2:r.m2,kind:r.report_kind,month:r.report_month.slice(0,7),as_of:r.report_date,distribution:r.report_kind==='baseline'?r.baseline_distribution:r.monthly_distribution,repurchase:r.cumulative_repurchase,note:r.report_note,created_at:r.created_at}));
+}
+async function start(){
+  if(!LIVE){if(el('submit'))setupSubmit();else setupDashboard();return}
+  document.querySelector('.preview').textContent='月度铺货追踪 · 9月底最终数作为基数，按月份保存周度累计更新。';
+  document.querySelector('header a').href+=(document.querySelector('header a').href.includes('?')?'&':'?')+'mode=live';
+  api=supabase.createClient(window.XUEBAI_CONFIG.supabaseUrl,window.XUEBAI_CONFIG.supabaseKey);
+  if(!el('submit')){
+    const {data}=await api.auth.getSession();
+    if(!data.session){
+      const main=document.querySelector('main');main.hidden=true;
+      const gate=document.createElement('section');gate.className='card form';gate.style.margin='10vh auto';gate.innerHTML='<h1>看板登录</h1><p>使用现有看板账号</p><div class="field"><label>邮箱</label><input id="email" type="email" autocomplete="username"></div><div class="field"><label>密码</label><input id="password" type="password" autocomplete="current-password"></div><button id="login">登录查看</button><p id="loginError" class="error"></p>';document.body.appendChild(gate);
+      el('login').onclick=async()=>{el('login').disabled=true;const {error}=await api.auth.signInWithPassword({email:el('email').value.trim(),password:el('password').value});el('login').disabled=false;if(error){el('loginError').textContent='登录失败：'+error.message;return}gate.remove();main.hidden=false;await initializeLive()};return;
+    }
+  }
+  await initializeLive();
+}
+async function initializeLive(){try{await loadRemote();if(el('submit'))setupSubmit();else setupDashboard()}catch(e){const notice=document.querySelector('.preview');notice.textContent='读取失败：'+e.message+'。请先执行新版字段SQL，并确认原提报表权限。';notice.classList.add('error');if(el('submit'))el('submit').disabled=true}}
+if(typeof document!=='undefined')start();
+</script></body></html>
