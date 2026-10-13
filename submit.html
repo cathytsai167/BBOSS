@@ -322,8 +322,8 @@ async function loadRemote(){
 }
 async function start(){
   if(!LIVE){if(el('submit'))setupSubmit();else setupDashboard();return}
-  document.querySelector('.preview').textContent='月度铺货追踪 · 9月底最终数作为基数，按月份保存周度累计更新。';
-  document.querySelector('header a').href+=(document.querySelector('header a').href.includes('?')?'&':'?')+'mode=live';
+  document.querySelector('.preview').textContent=el('submit')?'请核对上次数字后提交。':'每月累计，每周更新。';
+  const nextLink=document.querySelector('header a'),nextUrl=new URL(nextLink.href);nextUrl.searchParams.set('mode','live');nextLink.href=nextUrl.href;
   api=supabase.createClient(window.XUEBAI_CONFIG.supabaseUrl,window.XUEBAI_CONFIG.supabaseKey);
   if(!el('submit')){
     const {data}=await api.auth.getSession();
