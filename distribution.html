@@ -2,199 +2,13 @@
 </style></head><body><main>
 <header><div><h1>雪白听铺货追踪</h1><p>累计概览 · 月内周度更新 · 历史月份回看</p></div><a href="submit.html">填写最新数据 →</a></header>
 <div class="preview">正在读取最新提报…</div>
-<div class="toolbar card"><label>查看月份 <input id="month" type="month" min="2026-10"></label><label>M3 <select id="filter"><option value="">全部</option></select></label><span id="coverage"></span><button id="refresh" class="secondary">刷新</button></div>
-<div class="metrics"><article class="card"><p>累计铺货售点</p><strong id="total">—</strong><small id="totalNote"></small></article><article class="card"><p>累计已复购售点</p><strong id="repTotal">—</strong><small id="repNote"></small></article><article class="card"><p>累计复购率</p><strong id="rate">—</strong><small>已复购 / 已铺货 · 按同一批已提报M2计算</small></article><article class="card"><p>本月累计新增铺货</p><strong id="newTotal">—</strong><small id="newNote"></small></article></div>
+<div class="toolbar card"><label>查看月份 <select id="month"></select></label><label>M3 <select id="filter"><option value="">全部</option></select></label><span id="coverage"></span><button id="refresh" class="secondary">刷新</button></div>
+<div class="metrics"><article class="card"><p>累计铺货售点</p><strong id="total">—</strong><small id="totalNote"></small></article><article class="card"><p>累计已复购售点</p><strong id="repTotal">—</strong><small id="repNote"></small></article><article class="card"><p>累计复购率</p><strong id="rate">—</strong><small>已复购 / 已铺货 · 同口径售点计算</small></article><article class="card"><p id="newLabel">本月累计新增铺货</p><strong id="newTotal">—</strong><small id="newNote"></small></article></div>
 <section><h2>M3区域表现</h2><div id="regions" class="regions"></div></section>
 <section class="card"><div class="section-head"><h2>M2明细</h2><div class="sort"><label>M3筛选 <select id="m2Filter"><option value="">全部M3</option></select></label><label>排序标准 <select id="sort"><option value="default">M3 / M2默认顺序</option><option value="total">累计铺货</option><option value="rep">累计已复购</option><option value="new">本月新增铺货</option><option value="rate">累计复购率</option></select></label><label>顺序 <select id="direction"><option value="desc">高 → 低</option><option value="asc">低 → 高</option></select></label></div></div>
-<div class="table-scroll"><table><thead><tr><th>M3 / M2</th><th>9月底最终铺货</th><th>本月累计新增</th><th>累计铺货</th><th>累计已复购</th><th>累计复购率</th><th>本周状态</th><th>数据截止日</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="table-scroll"><table><thead><tr><th>M3 / M2</th><th>9月底最终铺货</th><th>本期新增 / 铺货</th><th>累计铺货</th><th>累计已复购</th><th>累计复购率</th><th>更新状态</th><th>数据截止 / 记录日期</th></tr></thead><tbody id="rows"></tbody></table></div>
 <p class="hint">每周五12:00（北京时间）进入新一轮“待更新”。补报9月底最终数不计作当月周度更新。累计指标需要9月底基数及此前各月数据齐全，缺报不按0处理。</p></section>
-</main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>window.XUEBAI_CONFIG = {
-  supabaseUrl: "https://hjuemoaxwotvgvppuits.supabase.co",
-  supabaseKey: "sb_publishable_kLCQcltuyPsjoM5udpUu4A_8iw1R-oD",
-  m2Rows: [
-  {
-    "m3": "丁点",
-    "name": "黄新军&许艳",
-    "base67": 805,
-    "rep67Initial": 87,
-    "target8": 500,
-    "dist8Initial": 105,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "孟祥杰",
-    "name": "谢国峰",
-    "base67": 605,
-    "rep67Initial": 61,
-    "target8": 400,
-    "dist8Initial": 132,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "丁点",
-    "name": "蔡芳",
-    "base67": 302,
-    "rep67Initial": 48,
-    "target8": 208,
-    "dist8Initial": 30,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "丁点",
-    "name": "季红州",
-    "base67": 430,
-    "rep67Initial": 72,
-    "target8": 220,
-    "dist8Initial": 42,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "丁点",
-    "name": "梅宇飞",
-    "base67": 152,
-    "rep67Initial": 22,
-    "target8": 110,
-    "dist8Initial": 21,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "孟祥杰",
-    "name": "高凌峰",
-    "base67": 313,
-    "rep67Initial": 56,
-    "target8": 240,
-    "dist8Initial": 50,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "孟祥杰",
-    "name": "陈永华",
-    "base67": 643,
-    "rep67Initial": 65,
-    "target8": 320,
-    "dist8Initial": 78,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "孟祥杰",
-    "name": "杭佳琪",
-    "base67": 505,
-    "rep67Initial": 29,
-    "target8": 275,
-    "dist8Initial": 39,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "孟祥杰",
-    "name": "茅东标",
-    "base67": 276,
-    "rep67Initial": 28,
-    "target8": 100,
-    "dist8Initial": 19,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "肖锡龙",
-    "name": "是焱彬-姜堰",
-    "base67": 38,
-    "rep67Initial": 1,
-    "target8": 200,
-    "dist8Initial": 45,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "肖锡龙",
-    "name": "是焱彬-靖江",
-    "base67": 111,
-    "rep67Initial": 0,
-    "target8": 200,
-    "dist8Initial": 114,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "肖锡龙",
-    "name": "王震-泰兴",
-    "base67": 86,
-    "rep67Initial": 4,
-    "target8": 150,
-    "dist8Initial": 51,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "肖锡龙",
-    "name": "王震-泰州",
-    "base67": 15,
-    "rep67Initial": 0,
-    "target8": 70,
-    "dist8Initial": 6,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "肖锡龙",
-    "name": "张雷",
-    "base67": 34,
-    "rep67Initial": 6,
-    "target8": 200,
-    "dist8Initial": 31,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "杨军",
-    "name": "费燕锋",
-    "base67": 70,
-    "rep67Initial": 0,
-    "target8": 200,
-    "dist8Initial": 24,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "杨军",
-    "name": "顾彬",
-    "base67": 117,
-    "rep67Initial": 1,
-    "target8": 200,
-    "dist8Initial": 31,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "杨军",
-    "name": "李海伟",
-    "base67": 89,
-    "rep67Initial": 5,
-    "target8": 260,
-    "dist8Initial": 35,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "杨军",
-    "name": "刘洲",
-    "base67": 51,
-    "rep67Initial": 0,
-    "target8": 200,
-    "dist8Initial": 30,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "杨军",
-    "name": "唐启军",
-    "base67": 61,
-    "rep67Initial": 1,
-    "target8": 150,
-    "dist8Initial": 21,
-    "rep8Initial": 0
-  },
-  {
-    "m3": "杨军",
-    "name": "张旭东",
-    "base67": 68,
-    "rep67Initial": 2,
-    "target8": 200,
-    "dist8Initial": 26,
-    "rep8Initial": 0
-  }
-]
-};
-</script><script>/* 独立预览：仅本机演示存储，不连接或写入Supabase。 */
+</main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>window.XUEBAI_CONFIG = {"supabaseUrl": "https://hjuemoaxwotvgvppuits.supabase.co", "supabaseKey": "sb_publishable_kLCQcltuyPsjoM5udpUu4A_8iw1R-oD", "m2Rows": [{"name": "黄新军&许艳", "m3": "丁点"}, {"name": "谢国峰", "m3": "孟祥杰"}, {"name": "蔡芳", "m3": "丁点"}, {"name": "季红州", "m3": "丁点"}, {"name": "梅宇飞", "m3": "丁点"}, {"name": "高凌峰", "m3": "孟祥杰"}, {"name": "陈永华", "m3": "孟祥杰"}, {"name": "杭佳琪", "m3": "孟祥杰"}, {"name": "茅东标", "m3": "孟祥杰"}, {"name": "是焱彬-姜堰", "m3": "肖锡龙"}, {"name": "是焱彬-靖江", "m3": "肖锡龙"}, {"name": "王震-泰兴", "m3": "肖锡龙"}, {"name": "王震-泰州", "m3": "肖锡龙"}, {"name": "张雷", "m3": "肖锡龙"}, {"name": "费燕锋", "m3": "杨军"}, {"name": "顾彬", "m3": "杨军"}, {"name": "李海伟", "m3": "杨军"}, {"name": "刘洲", "m3": "杨军"}, {"name": "唐启军", "m3": "杨军"}, {"name": "张旭东", "m3": "杨军"}]};</script><script>/* 独立预览：仅本机演示存储，不连接或写入Supabase。 */
 const STORAGE='xuebai-monthly-preview-v1';
 const LIVE=true;
 let remoteRecords=[],legacyRecords=[];
@@ -209,14 +23,7 @@ const today=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai',year:'
 const currentMonth=()=>today().slice(0,7);
 function monthList(end){let result=[];for(let m='2026-10';m<=end;){result.push(m);let [y,n]=m.split('-').map(Number);n++;if(n===13){n=1;y++}m=`${y}-${String(n).padStart(2,'0')}`}return result}
 function cycleStart(now=new Date()){let c=new Date(now.getTime()+8*3600000);const day=(c.getUTCDay()+2)%7;c.setUTCDate(c.getUTCDate()-day);c.setUTCHours(12,0,0,0);if(c.getTime()>now.getTime()+8*3600000)c.setUTCDate(c.getUTCDate()-7);return c.getTime()-8*3600000}
-function seed(){return bases.flatMap((b,i)=>{
-  if(i===bases.length-1)return []; // 故意保留缺报，检查空值展示。
-  const baseline=b.base67+b.dist8Initial+12+i*3;
-  const rep=b.rep67Initial+9+i;
-  const arr=[{m2:b.name,kind:'baseline',month:'2026-09',as_of:'2026-09-30',distribution:baseline,repurchase:rep,created_at:'2026-10-01T08:00:00Z'}];
-  if(i%5!==0)arr.push({m2:b.name,kind:'monthly',month:currentMonth(),as_of:today(),distribution:15+i*2,repurchase:rep+7+i,created_at:new Date().toISOString()});
-  return arr;
-})}
+function seed(){return []}
 function readRecords(){if(LIVE)return remoteRecords;try{const x=localStorage.getItem(STORAGE);return x?JSON.parse(x):seed()}catch{return seed()}}
 function latest(records,m2,kind,month){return records.filter(r=>r.m2===m2&&r.kind===kind&&r.month===month).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0]||null}
 function baselinePrefill(records,m2){
@@ -241,6 +48,35 @@ function buildRows(records,month){return bases.map(b=>{
   return {name:b.name,m3:b.m3,baseline:baseline?.distribution??null,total,rep,new:current?.distribution??null,rate:total&&rep!=null?rep/total:null,as_of:current?.as_of??null,updated:month===currentMonth()&&!!current&&new Date(current.created_at).getTime()>=cycleStart(),complete,baselineRecord:baseline,current};
 })}
 function totals(rows){const complete=rows.filter(x=>x.complete&&x.rep!=null);return {total:complete.length?complete.reduce((a,x)=>a+x.total,0):null,rep:complete.length?complete.reduce((a,x)=>a+x.rep,0):null,new:rows.some(x=>x.new!=null)?rows.reduce((a,x)=>a+(x.new??0),0):null,n:complete.length}}
+function historicalRow(b,month,records){
+  const end=month==='2026-07'?'2026-08-01':month==='2026-08'?'2026-09-01':'2026-10-01';
+  const old=legacyRecords.filter(r=>r.m2===b.name&&!r.report_kind).sort((a,c)=>new Date(c.created_at)-new Date(a.created_at));
+  const r=old.find(x=>new Date(x.created_at)<new Date(end+'T00:00:00+08:00'))||old[0];
+  const confirmed=latest(records,b.name,'baseline','2026-09');
+  const dist8=Number(r?.distribution_8??b.dist8Initial??0),rep67=Number(r?.repurchase_67??b.rep67Initial??0),rep8=Number(r?.repurchase_8??b.rep8Initial??0);
+  const base67=Number(b.base67||0),dist9=r?.distribution_9==null?null:Number(r.distribution_9);
+  const rep68=r?.repurchase_68==null?rep67+rep8:Number(r.repurchase_68);
+  let total,rep,added;
+  if(month==='2026-07'){total=base67;rep=rep67;added=base67}
+  else if(month==='2026-08'){total=base67+dist8;rep=rep68;added=dist8}
+  else{total=confirmed?.distribution??(base67+dist8+(dist9??0));rep=confirmed?.repurchase??rep68;added=dist9}
+  const isConfirmed=month==='2026-09'&&!!confirmed;
+  return {name:b.name,m3:b.m3,baseline:confirmed?.distribution??null,total,rep,new:added,rate:total?rep/total:null,as_of:isConfirmed?'2026-09-30':r?.created_at?.slice(0,10)||null,current:null,complete:isConfirmed,updated:false,provisional:!isConfirmed,source:isConfirmed?'已确认':month==='2026-09'?'9月底待确认':'历史记录'};
+}
+function displayRows(records,month){
+  if(month<'2026-10')return bases.map(b=>historicalRow(b,month,records));
+  const strict=buildRows(records,month);
+  return strict.map((r,i)=>{
+    if(r.complete)return {...r,provisional:false,source:'已提报'};
+    const b=bases[i],base=latest(records,b.name,'baseline','2026-09'),history=historicalRow(b,'2026-09',records);
+    const reports=monthList(month).map(m=>latest(records,b.name,'monthly',m)).filter(Boolean);
+    const mostRecent=reports.at(-1);
+    const total=(base?.distribution??history.total)+reports.reduce((a,x)=>a+x.distribution,0);
+    const rep=mostRecent?.repurchase??base?.repurchase??history.rep;
+    return {...r,total,rep,rate:total?rep/total:null,as_of:r.as_of??mostRecent?.as_of??(base?'2026-09-30':history.as_of),provisional:true,source:base?'本月/历史缺报':'9月底待确认'};
+  });
+}
+function displayTotals(rows){const known=rows.filter(r=>r.total!=null&&r.rep!=null);return {...totals(rows),total:known.length?known.reduce((a,r)=>a+r.total,0):null,rep:known.length?known.reduce((a,r)=>a+r.rep,0):null,provisional:rows.some(r=>r.provisional)}}
 function setupSubmit(){
   el('month').value=currentMonth();el('month').max=currentMonth();
   bases.forEach(b=>el('m2').add(new Option(b.name,b.name)));
@@ -299,20 +135,27 @@ function setupSubmit(){
     try{localStorage.setItem(STORAGE,JSON.stringify(records));el('msg').textContent='预览提报已保存，可打开铺货页查看。未提交到线上。';el('msg').className='success'}catch{fail('浏览器不允许本地存储，请换用同一浏览器打开这两页。')}
   });prefill();
 }
-function setupDashboard(){el('month').value=currentMonth();el('month').max=currentMonth();M3.forEach(m=>{el('filter').add(new Option(m,m));el('m2Filter').add(new Option(m,m))});
-  function render(){const month=el('month').value;if(!month||month<'2026-10'||month>currentMonth())return;const records=readRecords();let rows=buildRows(records,month).filter(r=>!el('filter').value||r.m3===el('filter').value);const t=totals(rows),updated=rows.filter(x=>x.current).length;
-    el('coverage').textContent=`本月已提报 ${updated}/${rows.length} · 9月底基数已确认 ${rows.filter(r=>r.baseline!=null).length}/${rows.length}`;
+function setupDashboard(){[['2026-07','6–7月（合并）'],['2026-08','8月'],['2026-09','9月'],...monthList(currentMonth()).map(m=>[m,Number(m.slice(5))+'月'])].forEach(([v,n])=>el('month').add(new Option(n,v)));el('month').value=currentMonth();M3.forEach(m=>{el('filter').add(new Option(m,m));el('m2Filter').add(new Option(m,m))});
+  function render(){const month=el('month').value;if(!month||month<'2026-07'||month>currentMonth())return;const records=readRecords();let rows=displayRows(records,month).filter(r=>!el('filter').value||r.m3===el('filter').value);const t=displayTotals(rows),updated=rows.filter(x=>x.current).length;
+    el('coverage').textContent=month<'2026-10'?'历史记录 · 6–7月合并统计':`本月已提报 ${updated}/${rows.length} · 9月底基数已确认 ${rows.filter(r=>r.baseline!=null).length}/${rows.length}`;
     el('total').textContent=fmt(t.total);el('repTotal').textContent=fmt(t.rep);el('rate').textContent=pct(t.rep,t.total);el('newTotal').textContent=fmt(t.new);
-    el('totalNote').textContent=`9月底基数 + 各月新增 · 完整数据 ${t.n}/${rows.length} 个M2`;
-    el('repNote').textContent=`所选月最新累计值 · 同口径 ${t.n}/${rows.length} 个M2`;
-    const dates=rows.map(r=>r.as_of).filter(Boolean).sort();el('newNote').textContent=dates.length?`已报 ${updated}/${rows.length} · 截止日 ${dates[0]}～${dates.at(-1)}`:'待更新';
-    el('regions').innerHTML=M3.filter(m=>!el('filter').value||m===el('filter').value).map(m=>{const rs=rows.filter(x=>x.m3===m),s=totals(rs);return `<article class="card region"><h2>${escapeHtml(m)}</h2><p>累计铺货 <strong>${fmt(s.total)}</strong></p><p>累计复购 <b>${fmt(s.rep)}</b></p><p>区域售点复购率 <b>${pct(s.rep,s.total)}</b></p><div class="rate-track"><div class="rate-fill" style="width:${Math.min(100,(s.total?s.rep/s.total:0)*100)}%"></div></div><p>本月新增 <b>${fmt(s.new)}</b></p><small>完整 ${s.n}/${rs.length} · 已提报 ${rs.filter(r=>r.current).length}/${rs.length}</small></article>`}).join('');
+    el('newLabel').textContent=month==='2026-07'?'6–7月铺货售点':`${Number(month.slice(5))}月累计新增铺货`;
+    el('totalNote').textContent=month<'2026-10'?'历史提报数据，记录日期不等同月底快照。':t.provisional?'含历史最近已知数据；缺报月份新增尚未计入。':`已确认数据 ${t.n}/${rows.length} 个M2`;
+    el('repNote').textContent=month<'2026-09'?'历史复购记录，不代表该月底最终快照。':t.provisional?'旧复购口径可能仅覆盖6–8月，9月底最终数待确认。':`已确认累计复购 ${t.n}/${rows.length} 个M2`;
+    const dates=rows.map(r=>r.as_of).filter(Boolean).sort();el('newNote').textContent=month<'2026-10'?'历史记录恢复展示；最终数以核对提报为准。':dates.length?`本月已报 ${updated}/${rows.length} · 最近已知日期 ${dates[0]}～${dates.at(-1)}`:'待更新';
+    el('regions').innerHTML=M3.filter(m=>!el('filter').value||m===el('filter').value).map(m=>{const rs=rows.filter(x=>x.m3===m),s=displayTotals(rs);return `<article class="card region"><h2>${escapeHtml(m)}</h2><p>累计铺货 <strong>${fmt(s.total)}</strong></p><p>累计复购 <b>${fmt(s.rep)}</b></p><p>区域售点复购率 <b>${pct(s.rep,s.total)}</b></p><div class="rate-track"><div class="rate-fill" style="width:${Math.min(100,(s.total?s.rep/s.total:0)*100)}%"></div></div><p>本期新增 / 铺货 <b>${fmt(s.new)}</b></p><small>${s.provisional?'含历史数，待核对':'已确认'} · 已提报 ${rs.filter(r=>r.current).length}/${rs.length}</small></article>`}).join('');
     rows=rows.filter(r=>!el('m2Filter').value||r.m3===el('m2Filter').value);
     if(el('sort').value!=='default'){const key=el('sort').value,dir=el('direction').value==='asc'?1:-1;rows.sort((a,b)=>a[key]==null?b[key]==null?0:1:b[key]==null?-1:dir*(a[key]-b[key]))}else rows.sort((a,b)=>M3.indexOf(a.m3)-M3.indexOf(b.m3)||bases.findIndex(x=>x.name===a.name)-bases.findIndex(x=>x.name===b.name));
-    el('rows').innerHTML=rows.map(r=>`<tr><td>${escapeHtml(r.m3)} / ${escapeHtml(r.name)}</td><td>${fmt(r.baseline)}</td><td>${fmt(r.new)}</td><td>${fmt(r.total)}</td><td>${fmt(r.rep)}</td><td>${pct(r.rep,r.total)}<div class="rate-track"><div class="rate-fill" style="width:${Math.min(100,(r.rate||0)*100)}%"></div></div></td><td><span class="tag ${r.updated?'ok':''}">${month===currentMonth()?r.updated?'已更新':'待更新':r.current?'已提报':'未提报'}</span></td><td>${r.as_of||'—'}</td></tr>`).join('');
+    el('rows').innerHTML=rows.map(r=>`<tr><td>${escapeHtml(r.m3)} / ${escapeHtml(r.name)}</td><td>${fmt(r.baseline)}</td><td>${fmt(r.new)}</td><td>${fmt(r.total)}</td><td>${fmt(r.rep)}</td><td>${pct(r.rep,r.total)}<div class="rate-track"><div class="rate-fill" style="width:${Math.min(100,(r.rate||0)*100)}%"></div></div></td><td><span class="tag ${r.updated?'ok':''}">${month<'2026-10'?r.source:month===currentMonth()?r.updated?'已更新':'待更新':r.current?'已提报':'未提报'}</span>${r.provisional?'<small>'+r.source+'</small>':''}</td><td>${r.as_of||'—'}</td></tr>`).join('');
   }['month','filter','m2Filter','sort','direction'].forEach(id=>el(id).addEventListener('change',render));el('refresh').addEventListener('click',async()=>{if(LIVE){try{await loadRemote()}catch(e){el('coverage').textContent='读取失败：'+e.message;return}}render()});window.addEventListener('storage',render);render();
 }
 async function loadRemote(){
+  // Protected reference values are loaded only after start() verifies the session.
+  const reference=await api.from('xuebai_distribution_reference').select('m2,base67,rep67_initial,dist8_initial,rep8_initial');
+  if(reference.error)throw new Error('历史基数读取失败，请先执行历史数据迁移SQL：'+reference.error.message);
+  const refs=new Map((reference.data||[]).map(r=>[r.m2,r]));
+  if(bases.some(b=>!refs.has(b.name)))throw new Error('历史基数尚未迁移完整，请执行历史数据迁移SQL');
+  bases.forEach(b=>{const r=refs.get(b.name);Object.assign(b,{base67:r.base67,rep67Initial:r.rep67_initial,dist8Initial:r.dist8_initial,rep8Initial:r.rep8_initial})});
   const all=[];
   for(let start=0;;start+=500){const {data,error}=await api.from('xuebai_weekly').select('*').order('created_at',{ascending:false}).range(start,start+499);if(error)throw error;all.push(...(data||[]));if(!data||data.length<500)break}
   legacyRecords=all;
