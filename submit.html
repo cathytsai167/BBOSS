@@ -325,11 +325,11 @@ async function start(){
   document.querySelector('.preview').textContent=el('submit')?'请核对上次数字后提交。':'每月累计，每周更新。';
   const nextLink=document.querySelector('header a'),nextUrl=new URL(nextLink.href);nextUrl.searchParams.set('mode','live');nextLink.href=nextUrl.href;
   api=supabase.createClient(window.XUEBAI_CONFIG.supabaseUrl,window.XUEBAI_CONFIG.supabaseKey);
-  if(!el('submit')){
+  {
     const {data}=await api.auth.getSession();
     if(!data.session){
       const main=document.querySelector('main');main.hidden=true;
-      const gate=document.createElement('section');gate.className='card form';gate.style.margin='10vh auto';gate.innerHTML='<h1>看板登录</h1><p>使用现有看板账号</p><div class="field"><label>邮箱</label><input id="email" type="email" autocomplete="username"></div><div class="field"><label>密码</label><input id="password" type="password" autocomplete="current-password"></div><button id="login">登录查看</button><p id="loginError" class="error"></p>';document.body.appendChild(gate);
+      const gate=document.createElement('section');gate.className='card form';gate.style.margin='10vh auto';gate.innerHTML=`<h1>${el('submit')?'提报登录':'看板登录'}</h1><p>使用现有看板账号</p><div class="field"><label>邮箱</label><input id="email" type="email" autocomplete="username"></div><div class="field"><label>密码</label><input id="password" type="password" autocomplete="current-password"></div><button id="login">登录</button><p id="loginError" class="error"></p>`;document.body.appendChild(gate);
       el('login').onclick=async()=>{el('login').disabled=true;const {error}=await api.auth.signInWithPassword({email:el('email').value.trim(),password:el('password').value});el('login').disabled=false;if(error){el('loginError').textContent='登录失败：'+error.message;return}gate.remove();main.hidden=false;await initializeLive()};return;
     }
   }
