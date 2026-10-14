@@ -169,7 +169,9 @@ function summaryHTML(){
  const ytdMetrics=[['YTD STW',fmt(stw)+' 箱',stw==null?'暂无销量数据':fmt(stw*.06)+' HL'],['YTD STR',fmt(str)+' 箱',str==null?'暂无销量数据':fmt(str*.06)+' HL'],['累计铺货',fmt(t.dist)+' 家',monthLabel+'最新已知累计'],['累计已复购',fmt(t.rep)+' 家','累计复购率 '+pct(t.rate)]];
  const monthMetrics=[[monthLabel+'MTD STW',fmt(monthStw)+' 箱',monthStw==null?'本月暂无底表':fmt(monthStw*.06)+' HL'],[monthLabel+'MTD STR',fmt(monthStr)+' 箱',monthStr==null?'本月暂无底表':fmt(monthStr*.06)+' HL'],[monthLabel+'新增铺货',fmt(t.added)+' 家','本月累计新增']];
  const canonical=n=>{n=['刘洲','李海伟','邵毅/李海伟'].includes(n)?'刘洲&李海伟':n;return product==='classic'?n.replace(/^王震-.*/,'王震').replace(/^是焱彬-.*/,'是焱彬'):n};
- const labels=[...new Set([...dist.map(x=>canonical(x.name)),...sales.map(x=>canonical(x.m2))])];
+ const currentM2=new Set(names.map(x=>canonical(x.name)));
+ const summarySales=sales.filter(x=>currentM2.has(canonical(x.m2))||x.stw.some(v=>Number(v||0)!==0)||x.str.some(v=>Number(v||0)!==0));
+ const labels=[...new Set([...dist.map(x=>canonical(x.name)),...summarySales.map(x=>canonical(x.m2))])];
  const records=labels.map(name=>{const ss=sales.filter(x=>canonical(x.m2)===name),ds=dist.filter(x=>canonical(x.name)===name);return {name,m3:ds[0]?.m3||ss[0]?.m3||'',ss,ds,dt:distributionTotals(ds)}}).sort((a,b)=>M3.indexOf(a.m3)-M3.indexOf(b.m3)||names.findIndex(n=>canonical(n.name)===a.name)-names.findIndex(n=>canonical(n.name)===b.name));
  const displayName=name=>name==='王震'?'王震（泰州 / 泰兴）':name==='是焱彬'?'是焱彬（靖江 / 姜堰）':name==='刘洲&李海伟'?'刘洲 & 李海伟':name;
  const cells=(ss,dt)=>`<td class="stw-ytd">${fmt(ss.length?sum(ss.map(x=>x.stw_ytd)):null)}</td><td class="stw-current">${fmt(monthlySales(ss,'stw'))}</td><td class="str-ytd">${fmt(ss.length?sum(ss.map(x=>x.str_ytd)):null)}</td><td class="str-current">${fmt(monthlySales(ss,'str'))}</td><td class="dist-total">${fmt(dt.dist)}</td><td>${fmt(dt.added)}</td><td class="rep-total">${fmt(dt.rep)}</td><td>${pct(dt.rate)}</td>`;
