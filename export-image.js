@@ -25,10 +25,9 @@ async function exportDashboardImage(target, filename, title, button) {
     clone.querySelectorAll('.table-wrap,[style*="overflow:auto"]').forEach(x => { x.style.maxHeight='none'; x.style.height='auto'; x.style.overflow='visible'; });
     clone.querySelectorAll('th,td').forEach(x => { x.style.position='static'; x.style.left='auto'; x.style.top='auto'; x.style.bottom='auto'; });
     frame.appendChild(clone); host.appendChild(frame); document.body.appendChild(host);
-    [clone, ...clone.querySelectorAll('*')].forEach(x => {
-      const size = parseFloat(getComputedStyle(x).fontSize);
-      if (Number.isFinite(size) && size > 0) x.style.fontSize = Math.round(size * 1.1 * 10) / 10 + 'px';
-    });
+    // Read every original size first so inherited text is not enlarged repeatedly.
+    const textSizes=[clone, ...clone.querySelectorAll('*')].map(x=>({x,size:parseFloat(getComputedStyle(x).fontSize)}));
+    textSizes.forEach(({x,size})=>{if(Number.isFinite(size)&&size>0)x.style.fontSize=Math.round(size*1.1*10)/10+'px'});
     if (document.fonts?.ready) await Promise.race([document.fonts.ready, new Promise(resolve => setTimeout(resolve, 2000))]);
     const rect=frame.getBoundingClientRect(),width=Math.ceil(Math.max(frame.scrollWidth,rect.width)),height=Math.ceil(Math.max(frame.scrollHeight,rect.height));
     if (!(width > 0 && height > 0)) throw new Error('图片布局尺寸为空，未下载文件。请刷新看板后重试。');
