@@ -1,5 +1,5 @@
 (()=>{
-const $=id=>document.getElementById(id),M3=['丁点','孟祥杰','肖锡龙','杨军'];
+const $=id=>document.getElementById(id),M3=['丁点','孟祥杰','肖锡龙','杨军','李小东'];
 const names=window.NP_NAMES;
 const client=supabase.createClient('https://hjuemoaxwotvgvppuits.supabase.co','sb_publishable_kLCQcltuyPsjoM5udpUu4A_8iw1R-oD');
 const fmt=n=>n==null?'—':Number(n).toLocaleString('zh-CN',{maximumFractionDigits:1});
@@ -8,7 +8,18 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const date=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const monthsTo=end=>{let list=[];for(let m='2026-10';m<=end;){list.push(m);let[y,n]=m.split('-').map(Number);if(++n>12){n=1;y++}m=`${y}-${String(n).padStart(2,'0')}`}return list};
 function cycleStart(now=new Date()){const d=new Date(now.getTime()+8*3600000);d.setUTCDate(d.getUTCDate()-(d.getUTCDay()+2)%7);d.setUTCHours(12,0,0,0);if(+d>+now+8*3600000)d.setUTCDate(d.getUTCDate()-7);return +d-8*3600000}
-let state=null,product='snow';
+let state=null,product='snow',region='',rerender=null;
+const regionRows=rows=>rows.filter(r=>!region||r.m3===region);
+const regionLabel=()=>region||'苏东 TTL';
+function applySelection(selection){
+ if(!selection||!['snow','classic'].includes(selection.product)||!['',...M3].includes(selection.region))return;
+ product=selection.product;region=selection.region;document.body.dataset.product=product;
+ if($('product'))$('product').value=product;
+ ['m3Filter','filter','m2Filter'].forEach(id=>{if($(id))$(id).value=''});
+ rerender?.();
+}
+window.addEventListener?.('message',e=>{if(e.source===window.parent&&e.data?.type==='np-selection'&&(e.origin===window.location?.origin||e.origin==='null'))applySelection(e.data.selection)});
+if(window.parent&&window.parent!==window){document.body.dataset.embedded='true';window.parent.postMessage({type:'np-ready'},window.location.origin==='null'?'*':window.location.origin)}
 const sum=xs=>xs.reduce((a,x)=>a+x,0);
 const aggregate=(rows,key)=>{const valid=rows.filter(r=>r[key]!=null);return valid.length?sum(valid.map(r=>r[key])):null};
 const latest=(test)=>state.weekly.find(test);
@@ -51,45 +62,53 @@ function chart(series,labels){
  const all=series.flatMap(s=>s.values),min=Math.min(0,...all)*1.2,max=Math.max(1,...all)*1.15,scale=175/(max-min),y=v=>235-(v-min)*scale,baseline=y(0),width=830/Math.max(1,labels.length),bw=Math.min(52,width/(series.length+1));
  return [0,.25,.5,.75,1].map(p=>{const v=min+(max-min)*p;return `<line x1="100" y1="${y(v)}" x2="950" y2="${y(v)}" stroke="#e6eaf0"/><text x="86" y="${y(v)+5}" text-anchor="end" fill="#64748b" font-size="17">${fmt(v)}</text>`}).join('')+labels.map((label,i)=>series.map((s,j)=>{const v=s.values[i]??0,h=Math.abs(v)*scale,x=110+i*width+width/2+(j-series.length/2)*bw;return `<rect x="${x}" y="${v>=0?y(v):baseline}" width="${bw-7}" height="${h}" rx="4" fill="${s.color}"/><text x="${x+(bw-7)/2}" y="${v>=0?y(v)-9:y(v)+20}" text-anchor="middle" fill="${s.color}" font-size="17" font-weight="700">${fmt(v)}</text>`}).join('')+`<text x="${110+i*width+width/2}" y="285" text-anchor="middle" fill="#475569" font-size="19">${esc(label)}</text>`).join('');
 }
-function regionsChart(rows,key,color){const max=Math.max(1,...rows.flatMap(r=>[r.stw_ytd,r.str_ytd]));return M3.map(m=>{const r=rows.find(r=>r.m3===m)||{},v=r[key]||0;return `<div class="m3bar"><b>${m}</b><div class="bar-track"><div class="bar-fill" style="width:${Math.max(0,v)/max*100}%;background:${color}"></div></div><strong>${fmt(v)}</strong></div>`}).join('')}
+function regionsChart(rows,key,color){const max=Math.max(1,...rows.flatMap(r=>[r.stw_ytd,r.str_ytd]));return M3.filter(m=>!region||m===region).map(m=>{const r=rows.find(r=>r.m3===m),v=r?.[key]??null;return `<div class="m3bar"><b>${m}</b><div class="bar-track"><div class="bar-fill" style="width:${Math.max(0,v||0)/max*100}%;background:${color}"></div></div><strong>${fmt(v)}</strong></div>`}).join('')}
 const salesData=which=>which==='snow'?state.sales:state.sales.products?.classic;
 function setupSales(){
  const render=()=>{
+  document.body.dataset.product=product;
   const data=salesData(product),label=product==='snow'?'雪白听':'经典听';$('pageTitle').textContent=label+'销量追踪';
   if(!data){$('content').hidden=true;$('status').textContent='经典听销量数据尚未配置，请执行新品数据SQL。';return}
   if(product==='classic'&&!data.months.includes('8月')){$('content').hidden=true;$('status').textContent='经典听8月销量尚未补齐，请执行修正SQL后刷新数据。';return}
   $('content').hidden=false;$('status').textContent='';
   $('period').textContent=`STW截至 ${data.period.stw_max} · STR截至 ${data.period.str_max} · ${product==='snow'?'6月29日起提货':data.period.stw_min+'首提货；9月开始铺货统计'}`;
-  const rows=data.dealers.filter(d=>M3.includes(d.m3)&&(d.stw.some(v=>v!==0)||d.str.some(v=>v!==0))),stw=sum(rows.map(d=>d.stw_ytd)),str=sum(rows.map(d=>d.str_ytd));
-  $('stw').textContent=fmt(stw)+' 箱';$('str').textContent=fmt(str)+' 箱';$('stwHl').textContent='折合 '+fmt(stw*.06)+' HL';$('strHl').textContent='折合 '+fmt(str*.06)+' HL';
+  $('period').textContent=regionLabel()+' · '+$('period').textContent;
+  const rows=regionRows(data.dealers.filter(d=>M3.includes(d.m3)&&(d.stw.some(v=>v!==0)||d.str.some(v=>v!==0)))),stw=rows.length?sum(rows.map(d=>d.stw_ytd)):null,str=rows.length?sum(rows.map(d=>d.str_ytd)):null;
+  $('stw').textContent=fmt(stw)+' 箱';$('str').textContent=fmt(str)+' 箱';$('stwHl').textContent=stw==null?'暂无区域销量数据':'折合 '+fmt(stw*.06)+' HL';$('strHl').textContent=str==null?'暂无区域销量数据':'折合 '+fmt(str*.06)+' HL';
   const denom=sum(rows.map(d=>d.ih_hl||0)),num=sum(rows.map(d=>d.snow_hl||0));
-  $('rateTitle').textContent=product==='snow'?'雪白提货渗透率':'有STR的经销商';$('rate').textContent=product==='snow'?pct(denom?num/denom:null):fmt(rows.filter(d=>d.str_ytd>0).length)+' 家';
+  $('rateTitle').textContent=product==='snow'?'雪白提货渗透率':'有STR的经销商';$('rate').textContent=product==='snow'?pct(denom?num/denom:null):fmt(rows.length?rows.filter(d=>d.str_ytd>0).length:null)+' 家';
   $('rateNote').textContent=product==='snow'?'雪白听STR(HL) / 大富豪IH主要SKU STR(HL)，均自6月29日起。主要SKU：超爽瓶/听、金麦芽听、金飘铃瓶、通州瓶、雪白瓶/听。':'经典听上市以来累计STR为正的经销商数量。1箱 = 6L = 0.06HL。';
-  $('negative').textContent=`负数STR按原值计入：${fmt(data.audit?.negative_rows_snow_can_used??0)}条，合计 ${fmt(data.audit?.negative_cases_snow_can_used??0)}箱，可能存在免费酒盘库偏差。`;
-  $('trend').innerHTML=chart([{color:'#1f5fae',values:data.months.map((_,i)=>sum(rows.map(d=>d.stw[i]||0)))},{color:'#27815b',values:data.months.map((_,i)=>sum(rows.map(d=>d.str[i]||0)))}],data.months);
-  $('stwRegions').innerHTML=regionsChart(data.regions,'stw_ytd','#1f5fae');$('strRegions').innerHTML=regionsChart(data.regions,'str_ytd','#27815b');
+  $('negative').textContent=region?'负数STR按原值计入，可能存在免费酒盘库偏差；全产品负数记录合计 '+fmt(data.audit?.negative_cases_snow_can_used??0)+' 箱。':`负数STR按原值计入：${fmt(data.audit?.negative_rows_snow_can_used??0)}条，合计 ${fmt(data.audit?.negative_cases_snow_can_used??0)}箱，可能存在免费酒盘库偏差。`;
+  $('trend').innerHTML=rows.length?chart([{color:'#1f5fae',values:data.months.map((_,i)=>sum(rows.map(d=>d.stw[i]||0)))},{color:'#27815b',values:data.months.map((_,i)=>sum(rows.map(d=>d.str[i]||0)))}],data.months):'<text x="500" y="160" text-anchor="middle">暂无区域销量数据</text>';
+  const rs=M3.map(m=>({m3:m,stw_ytd:sum(rows.filter(d=>d.m3===m).map(d=>d.stw_ytd)),str_ytd:sum(rows.filter(d=>d.m3===m).map(d=>d.str_ytd))})).filter(r=>rows.some(d=>d.m3===r.m3));
+  $('stwRegions').innerHTML=regionsChart(rs,'stw_ytd','#1f5fae');$('strRegions').innerHTML=regionsChart(rs,'str_ytd','#27815b');
   $('dealerHead').innerHTML=`<tr><th rowspan="2">M3</th><th rowspan="2">M2</th><th rowspan="2">经销商</th><th class="stw-group" colspan="${data.months.length+1}">STW</th><th class="str-group" colspan="${data.months.length+1}">STR</th>${product==='snow'?'<th class="rate-head" rowspan="2">雪白提货渗透率</th>':''}</tr><tr>${['stw','str'].map(k=>data.months.map(m=>`<th class="${k}-month">${m}</th>`).join('')+`<th class="${k}-ytd">YTD</th>`).join('')}</tr>`;
   const sort=$('sortBy');const previous=sort.value;sort.innerHTML='<option value="default">M3 / M2默认顺序</option><option value="stw_ytd">YTD STW</option><option value="str_ytd">YTD STR</option>'+data.months.map((m,i)=>`<option value="stw:${i}">${m} STW</option><option value="str:${i}">${m} STR</option>`).join('')+(product==='snow'?'<option value="penetration">雪白提货渗透率</option>':'');if([...sort.options].some(o=>o.value===previous))sort.value=previous;
   const body=()=>{let xs=rows.filter(r=>!$('m3Filter').value||r.m3===$('m3Filter').value);const key=sort.value,dir=$('sortDir').value==='asc'?1:-1,rank=d=>names.findIndex(n=>n.name===d.m2),order=(a,b)=>M3.indexOf(a.m3)-M3.indexOf(b.m3)||rank(a)-rank(b)||a.dealer.localeCompare(b.dealer,'zh-CN');
    const value=d=>key.includes(':')?d[key.split(':')[0]][Number(key.split(':')[1])]:d[key];xs.sort(key==='default'?order:(a,b)=>value(a)==null?value(b)==null?order(a,b):1:value(b)==null?-1:dir*(value(a)-value(b))||order(a,b));
-   $('dealerBody').innerHTML=xs.map(d=>`<tr><td>${esc(d.m3)}</td><td>${esc(d.m2)}</td><td>${esc(d.dealer)}</td>${['stw','str'].map(k=>d[k].map(v=>`<td class="${k}-month">${fmt(v)}</td>`).join('')+`<td class="${k}-ytd">${fmt(d[k+'_ytd'])}</td>`).join('')}${product==='snow'?`<td class="rate-cell">${pct(d.penetration)}<div class="rate-track"><div class="rate-fill" style="width:${Math.max(0,Math.min(100,(d.penetration||0)*100))}%"></div></div></td>`:''}</tr>`).join('');$('rowCount').textContent=`共 ${xs.length} 家经销商`;
+   $('dealerBody').innerHTML=xs.map(d=>`<tr><td>${esc(d.m3)}</td><td>${esc(d.m2)}</td><td>${esc(d.dealer)}</td>${['stw','str'].map(k=>d[k].map(v=>`<td class="${k}-month">${fmt(v)}</td>`).join('')+`<td class="${k}-ytd">${fmt(d[k+'_ytd'])}</td>`).join('')}${product==='snow'?`<td class="rate-cell">${pct(d.penetration)}<div class="rate-track"><div class="rate-fill" style="width:${Math.max(0,Math.min(100,(d.penetration||0)*100))}%"></div></div></td>`:''}</tr>`).join('')||`<tr><td colspan="${3+2*(data.months.length+1)+(product==='snow'?1:0)}">暂无区域销量数据</td></tr>`;
+   const totalDen=sum(xs.map(d=>d.ih_hl||0));if($('dealerFoot'))$('dealerFoot').innerHTML=xs.length?`<tr><td>合计</td><td>${xs.length}家</td><td>当前筛选范围</td>${['stw','str'].map(k=>data.months.map((m,i)=>`<td class="${k}-month">${fmt(sum(xs.map(d=>d[k][i]||0)))}</td>`).join('')+`<td class="${k}-ytd">${fmt(sum(xs.map(d=>d[k+'_ytd'])))}</td>`).join('')}${product==='snow'?`<td class="rate-cell">${pct(totalDen?sum(xs.map(d=>d.snow_hl||0))/totalDen:null)}</td>`:''}</tr>`:'';
+   $('rowCount').textContent=`共 ${xs.length} 家经销商`;
   };['sortBy','sortDir','m3Filter'].forEach(id=>$(id).onchange=body);body();
- };$('product').onchange=()=>{product=$('product').value;render()};render();
+ };rerender=render;$('product').onchange=()=>{product=$('product').value;render()};render();
 }
 function setupDistribution(){
  const options=()=>{const old=$('month').value,ms=product==='snow'?[['2026-07','6–7月（合并）'],['2026-08','8月'],['2026-09','9月']]:[['2026-09','9月']];ms.push(...monthsTo(date().slice(0,7)).map(m=>[m,Number(m.slice(5))+'月']));$('month').innerHTML=ms.map(([v,t])=>`<option value="${v}">${t}</option>`).join('');$('month').value=ms.some(([v])=>v===old)?old:date().slice(0,7)};
  const render=()=>{
-  const month=$('month').value;$('pageTitle').textContent=(product==='snow'?'雪白听':'经典听')+'铺货追踪';
-  let rows=distributionRows(product,month).filter(r=>!$('filter').value||r.m3===$('filter').value);const t=distributionTotals(rows);
+  document.body.dataset.product=product;
+  const month=$('month').value;$('pageTitle').textContent=(product==='snow'?'雪白听':'经典听')+'铺货追踪';$('period').textContent=regionLabel()+' · '+Number(month.slice(5))+'月铺货进度';
+  let rows=regionRows(distributionRows(product,month)).filter(r=>!$('filter').value||r.m3===$('filter').value);const t=distributionTotals(rows);
   $('total').textContent=fmt(t.dist);$('repTotal').textContent=fmt(t.rep);$('repRate').textContent=pct(t.rate);$('newTotal').textContent=fmt(t.added);$('newLabel').textContent=month==='2026-07'?'6–7月铺货售点':Number(month.slice(5))+'月累计新增铺货';
   $('totalNote').textContent=t.provisional?'含历史已知数；未提报月份新增不按0确认。':'按所选月份累计，售点不跨产品去重。';
   $('repNote').textContent=product==='classic'&&month==='2026-09'?'9月底经典听复购未收集。':`复购率按铺货及复购都有数字的 ${t.coverage}/${rows.length} 个M2计算。`;
   $('coverage').textContent=`${rows.filter(r=>r.current).length}/${rows.length} 个M2本月已提报 · 每周五12:00切换待更新`;
-  $('regions').innerHTML=M3.filter(m=>!$('filter').value||m===$('filter').value).map(m=>{const rs=rows.filter(r=>r.m3===m),s=distributionTotals(rs);return `<article class="card"><h3>${m}</h3><p>累计铺货 <b>${fmt(s.dist)}</b> 家</p><p>累计复购 <b>${fmt(s.rep)}</b> 家</p><p>区域售点复购率 <b>${pct(s.rate)}</b></p><div class="rate-track"><div class="rate-fill" style="background:#27815b;width:${Math.min(100,Math.max(0,(s.rate||0)*100))}%"></div></div><p>本期新增 <b>${fmt(s.added)}</b> 家</p></article>`}).join('');
+  $('regions').style?.setProperty('--region-count',region?'1':'5');
+  $('regions').innerHTML=M3.filter(m=>(!region||m===region)&&(!$('filter').value||m===$('filter').value)).map(m=>{const rs=rows.filter(r=>r.m3===m),s=distributionTotals(rs);return `<article class="card"><h3>${m}</h3><p>累计铺货 <b>${fmt(s.dist)}</b> 家</p><p>累计复购 <b>${fmt(s.rep)}</b> 家</p><p>区域售点复购率 <b>${pct(s.rate)}</b></p><div class="rate-track"><div class="rate-fill" style="background:#27815b;width:${Math.min(100,Math.max(0,(s.rate||0)*100))}%"></div></div><p>本期新增 <b>${fmt(s.added)}</b> 家</p></article>`}).join('');
   rows=rows.filter(r=>!$('m2Filter').value||r.m3===$('m2Filter').value);const key=$('sortBy').value,dir=$('sortDir').value==='asc'?1:-1,val=r=>key==='rate'?(r.total&&r.rep!=null?r.rep/r.total:null):r[key];rows.sort(key==='default'?(a,b)=>M3.indexOf(a.m3)-M3.indexOf(b.m3): (a,b)=>val(a)==null?val(b)==null?0:1:val(b)==null?-1:dir*(val(a)-val(b)));
-  $('rows').innerHTML=rows.map(r=>`<tr><td>${esc(r.m3)}</td><td>${esc(r.name)}</td><td>${fmt(r.baseline)}</td><td>${fmt(r.new)}</td><td>${fmt(r.total)}</td><td>${fmt(r.rep)}</td><td>${pct(r.total&&r.rep!=null?r.rep/r.total:null)}</td><td><span class="tag ${r.updated?'ok':''}">${month<'2026-10'?r.source:month===date().slice(0,7)?r.updated?'已更新':'待更新':r.current?'已提报':'未提报'}</span>${r.provisional?'<small>缺报待补</small>':''}</td><td>${r.as_of||'—'}</td></tr>`).join('');
+  $('rows').innerHTML=rows.map(r=>`<tr><td>${esc(r.m3)}</td><td>${esc(r.name)}</td><td>${fmt(r.baseline)}</td><td>${fmt(r.new)}</td><td class="dist-total">${fmt(r.total)}</td><td class="rep-total">${fmt(r.rep)}</td><td>${pct(r.total&&r.rep!=null?r.rep/r.total:null)}</td><td><span class="tag ${r.updated?'ok':''}">${month<'2026-10'?r.source:month===date().slice(0,7)?r.updated?'已更新':'待更新':r.current?'已提报':'未提报'}</span>${r.provisional?'<small>缺报待补</small>':''}</td><td>${r.as_of||'—'}</td></tr>`).join('')||'<tr><td colspan="9">暂无区域铺货数据</td></tr>';
+  if($('distributionFoot')){const ft=distributionTotals(rows);$('distributionFoot').innerHTML=rows.length?`<tr><td>合计</td><td>${rows.length}个M2</td><td>${fmt(aggregate(rows,'baseline'))}</td><td>${fmt(ft.added)}</td><td class="dist-total">${fmt(ft.dist)}</td><td class="rep-total">${fmt(ft.rep)}</td><td>${pct(ft.rate)}</td><td colspan="2">复购率按有完整配对数字的M2加权计算</td></tr>`:''}
  };
- $('product').onchange=()=>{product=$('product').value;options();render()};['month','filter','m2Filter','sortBy','sortDir'].forEach(id=>$(id).onchange=render);options();render();
+ rerender=()=>{options();render()};$('product').onchange=()=>{product=$('product').value;options();render()};['month','filter','m2Filter','sortBy','sortDir'].forEach(id=>$(id).onchange=render);options();render();
 }
 function setupOverview(){
  const p=state.sales.portfolio;
@@ -131,11 +150,28 @@ async function load(){
  state={sales,refs:r.data||[],weekly};$('status').textContent='';
  ['m3Filter','filter','m2Filter','analysisM3'].forEach(id=>{if($(id)&&$(id).options.length===1)M3.forEach(m=>$(id).add(new Option(m,m)))});
  if(document.body.dataset.page==='sales')setupSales();else if(document.body.dataset.page==='distribution')setupDistribution();else setupOverview();
+ if(window.parent&&window.parent!==window)window.parent.postMessage({type:'np-ready'},window.location.origin==='null'?'*':window.location.origin);
 }
 $('refresh')?.addEventListener('click',()=>load().catch(e=>$('status').textContent='读取失败：'+e.message));
-function exportImage(selector,button,title){const label=document.body.dataset.page==='overview'?'大富豪新品':product==='snow'?'雪白听':'经典听';if(typeof exportDashboardImage==='function')exportDashboardImage(selector,label+'_'+title+'_'+date()+'.png',label+' '+title,button)}
+function exportImage(selector,button,title){const label=document.body.dataset.page==='overview'?'大富豪新品':product==='snow'?'雪白听':'经典听';if(typeof exportDashboardImage==='function')exportDashboardImage(selector,label+'_'+regionLabel()+'_'+title+'_'+date()+'.png',label+' · '+regionLabel()+' · '+title,button)}
 $('exportDetail')?.addEventListener('click',e=>exportImage('#detailExportArea',e.currentTarget,document.body.dataset.page==='sales'?'经销商明细':document.body.dataset.page==='overview'?'M2联动明细':'M2铺货明细'));
 $('exportPage')?.addEventListener('click',e=>exportImage('.wrap',e.currentTarget,'完整看板'));
-if(window.NP_SKIP_LOAD)window.NP_TEST={distributionRows,distributionTotals,cycleStart,chart,setupSales,setupDistribution,setupOverview,setState:s=>state=s};
+function summaryHTML(){
+ const d=salesData(product);if(!d||product==='classic'&&!d.months.includes('8月'))throw new Error('请先补齐当前产品销量数据，再导出。');
+ const month=date().slice(0,7),sales=regionRows(d.dealers.filter(x=>M3.includes(x.m3))),dist=regionRows(distributionRows(product,month)),t=distributionTotals(dist),label=product==='snow'?'雪白听':'经典听';
+ const stw=sales.length?sum(sales.map(x=>x.stw_ytd)):null,str=sales.length?sum(sales.map(x=>x.str_ytd)):null;
+ const metrics=[['累计 STW',fmt(stw)+' 箱',stw==null?'暂无销量数据':fmt(stw*.06)+' HL'],['累计 STR',fmt(str)+' 箱',str==null?'暂无销量数据':fmt(str*.06)+' HL'],['累计铺货',fmt(t.dist)+' 家',Number(month.slice(5))+'月最新已知数'],['累计已复购',fmt(t.rep)+' 家',''],['售点复购率',pct(t.rate),'配对数字加权计算'],[Number(month.slice(5))+'月新增铺货',fmt(t.added)+' 家','月内累计']];
+ const canonical=n=>product==='classic'?n.replace(/^王震-.*/,'王震').replace(/^是焱彬-.*/,'是焱彬'):['刘洲','李海伟','邵毅/李海伟'].includes(n)?'刘洲&李海伟':n;
+ const labels=region?[...new Set([...dist.map(x=>canonical(x.name)),...sales.map(x=>canonical(x.m2))])]:M3;
+ const table=labels.map(name=>{const ss=sales.filter(x=>(region?canonical(x.m2):x.m3)===name),ds=dist.filter(x=>(region?canonical(x.name):x.m3)===name),dt=distributionTotals(ds);return `<tr><td>${esc(name)}</td><td class="blue">${fmt(ss.length?sum(ss.map(x=>x.stw_ytd)):null)}</td><td class="green">${fmt(ss.length?sum(ss.map(x=>x.str_ytd)):null)}</td><td>${fmt(dt.dist)}</td><td>${fmt(dt.rep)}</td><td>${pct(dt.rate)}</td></tr>`}).join('');
+ return `<h1>${label} · ${esc(regionLabel())} 区域简报</h1><p class="summary-note">STW截至 ${esc(d.period.stw_max)} ｜ STR截至 ${esc(d.period.str_max)} ｜ ${Number(month.slice(5))}月铺货最新已知数</p><div class="summary-grid">${metrics.map(([name,value,note])=>`<div><span>${name}</span><strong>${value}</strong><small>${note}</small></div>`).join('')}</div><div class="summary-table"><table><thead><tr><th>${region?'M2':'M3'}</th><th>累计STW（箱）</th><th>累计STR（箱）</th><th>累计铺货（家）</th><th>累计复购（家）</th><th>复购率</th></tr></thead><tbody>${table}</tbody></table></div><p class="summary-note">${t.provisional?'铺货含历史已知数，缺报未按0确认。':''}复购率按有铺货和复购配对数字的 ${t.coverage}/${dist.length} 个M2计算。负数STR按原值计入，可能存在免费酒盘库偏差。— 表示暂无数据。</p>`;
+}
+async function exportSummary(button){
+ if(!state){alert('数据仍在加载，请稍后再导出。');return}
+ let host;try{const html=summaryHTML();host=document.createElement('section');host.className='summary-export';host.innerHTML=html;host.style.position='absolute';host.style.left='-20000px';host.style.top='0';document.body.appendChild(host);await exportDashboardImage(host,(product==='snow'?'雪白听':'经典听')+'_'+regionLabel()+'_区域一页纸_'+date()+'.png','',button)}catch(e){alert(e.message)}finally{host?.remove()}
+}
+$('exportSummary')?.addEventListener('click',e=>exportSummary(e.currentTarget));
+window.addEventListener?.('message',async e=>{if(e.source===window.parent&&e.data?.type==='np-export-summary'&&(e.origin===window.location?.origin||e.origin==='null')){applySelection(e.data.selection);try{await exportSummary($('exportSummary'))}finally{window.parent.postMessage({type:'np-export-done'},window.location.origin==='null'?'*':window.location.origin)}}});
+if(window.NP_SKIP_LOAD)window.NP_TEST={distributionRows,distributionTotals,cycleStart,chart,setupSales,setupDistribution,setupOverview,applySelection,summaryHTML,setState:s=>state=s};
 if(!window.NP_SKIP_LOAD)load().catch(e=>$('status').textContent='读取失败：'+e.message);
 })();
