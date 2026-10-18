@@ -125,7 +125,7 @@ function setupOverview(){
 }
 function setupQuadrants(){
  const median=xs=>{const s=xs.slice().sort((a,b)=>a-b),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2};
- const render=()=>{const which=$('analysisProduct').value,month=date().slice(0,7),d=salesData(which),canonical=s=>{s=['刘洲','李海伟','邵毅/李海伟'].includes(s)?'刘洲&李海伟':s;return which==='classic'?s.replace(/^王震-.*/,'王震').replace(/^是焱彬-.*/,'是焱彬'):s};
+ const render=()=>{const which=$('analysisProduct').value,month=date().slice(0,7),d=salesData(which),canonical=s=>['刘洲','李海伟','邵毅/李海伟'].includes(s)?'刘洲&李海伟':s;
   const grouped=new Map();distributionRows(which,month).forEach(r=>{const name=canonical(r.name),x=grouped.get(name)||{name,m3:r.m3,total:0,rep:0,complete:true};x.complete&&=!r.provisional&&r.total>0&&r.rep!=null;x.total+=r.total||0;x.rep+=r.rep||0;grouped.set(name,x)});
   let rows=[...grouped.values()].filter(r=>r.complete).map(r=>{const ds=(d?.dealers||[]).filter(s=>canonical(s.m2)===r.name),den=sum(ds.map(s=>s.ih_hl||0));return {...r,stw:sum(ds.map(s=>s.stw_ytd)),str:sum(ds.map(s=>s.str_ytd)),penetration:den?sum(ds.map(s=>s.snow_hl||0))/den:null}});
   rows=rows.map(r=>({...r,productivity:r.str/r.total}));$('analysisCoverage').textContent=`完整提报 ${rows.length}/${grouped.size} 个M2 · 累计STR / 累计铺货为粗略单店产出，不代表新铺售点真实单店动销。`;
@@ -175,7 +175,7 @@ function summaryHTML(){
  const monthStw=monthlySales(sales,'stw'),monthStr=monthlySales(sales,'str');
  const ytdMetrics=[['YTD STW',fmt(stw)+' 箱',stw==null?'暂无销量数据':fmt(stw*.06)+' HL'],['YTD STR',fmt(str)+' 箱',str==null?'暂无销量数据':fmt(str*.06)+' HL'],['累计铺货',fmt(t.dist)+' 家',monthLabel+'最新已知累计'],['累计已复购',fmt(t.rep)+' 家','累计复购率 '+pct(t.rate)]];
  const monthMetrics=[[monthLabel+'MTD STW',fmt(monthStw)+' 箱',monthStw==null?'本月暂无底表':fmt(monthStw*.06)+' HL'],[monthLabel+'MTD STR',fmt(monthStr)+' 箱',monthStr==null?'本月暂无底表':fmt(monthStr*.06)+' HL'],[monthLabel+'新增铺货',fmt(t.added)+' 家','本月累计新增']];
- const canonical=n=>{n=['刘洲','李海伟','邵毅/李海伟'].includes(n)?'刘洲&李海伟':n;return product==='classic'?n.replace(/^王震-.*/,'王震').replace(/^是焱彬-.*/,'是焱彬'):n};
+ const canonical=n=>['刘洲','李海伟','邵毅/李海伟'].includes(n)?'刘洲&李海伟':n;
  const currentM2=new Set(names.map(x=>canonical(x.name)));
  const summarySales=sales.filter(x=>currentM2.has(canonical(x.m2))||x.stw.some(v=>Number(v||0)!==0)||x.str.some(v=>Number(v||0)!==0));
  const labels=[...new Set([...dist.map(x=>canonical(x.name)),...summarySales.map(x=>canonical(x.m2))])];
