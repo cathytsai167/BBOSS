@@ -152,12 +152,12 @@ async function load(){
  const weekly=[];for(let start=0;;start+=500){const q=await client.from('xuebai_weekly').select('*').order('created_at',{ascending:false}).range(start,start+499);if(q.error)throw q.error;weekly.push(...(q.data||[]));if(!q.data||q.data.length<500)break}
  state={sales,refs:r.data||[],weekly};$('status').textContent='';
  ['m3Filter','filter','m2Filter','analysisM3'].forEach(id=>{if($(id)&&$(id).options.length===1)M3.forEach(m=>$(id).add(new Option(m,m)))});
- if(document.body.dataset.page==='sales')setupSales();else if(document.body.dataset.page==='distribution')setupDistribution();else setupOverview();
+ if(document.body.dataset.page==='sales')setupSales();else if(document.body.dataset.page==='distribution')setupDistribution();else if(document.body.dataset.page==='analysis')window.NP_ANALYSIS.setup({$,M3,names,fmt,pct,esc,date,sum,aggregate,salesData,distributionRows,monthly,distributionTotals,regionRows,regionLabel,getProduct:()=>product,setProduct:p=>product=p,setRender:r=>rerender=r});else setupOverview();
  if(window.parent&&window.parent!==window)window.parent.postMessage({type:'np-ready'},window.location.origin==='null'?'*':window.location.origin);
 }
 $('refresh')?.addEventListener('click',()=>load().catch(e=>$('status').textContent='读取失败：'+e.message));
 function exportImage(selector,button,title){const label=document.body.dataset.page==='overview'?'大富豪新品':product==='snow'?'雪白听':'经典听';if(typeof exportDashboardImage==='function')exportDashboardImage(selector,label+'_'+regionLabel()+'_'+title+'_'+date()+'.png',label+' · '+regionLabel()+' · '+title,button)}
-$('exportDetail')?.addEventListener('click',e=>exportImage('#detailExportArea',e.currentTarget,document.body.dataset.page==='sales'?'经销商明细':document.body.dataset.page==='overview'?'M2联动明细':'M2铺货明细'));
+$('exportDetail')?.addEventListener('click',e=>exportImage('#detailExportArea',e.currentTarget,document.body.dataset.page==='sales'?'经销商明细':document.body.dataset.page==='analysis'?'M2机会清单':document.body.dataset.page==='overview'?'M2联动明细':'M2铺货明细'));
 $('exportPage')?.addEventListener('click',e=>exportImage('.wrap',e.currentTarget,'完整看板'));
 function summaryQuantity(value,values,kind){
  if(value==null||!Number.isFinite(value))return '—';
