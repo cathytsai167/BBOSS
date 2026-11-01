@@ -1,75 +1,138 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>大富豪新品铺货提报</title><style>:root{--blue:#174d8c;--green:#216b4d;--muted:#64748b}*{box-sizing:border-box}body{margin:0;background:#f5f7fb;color:#21314a;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif}main{max-width:1580px;margin:0 auto;padding:28px}header{display:flex;justify-content:space-between;align-items:center;gap:18px;background:white;border-top:6px solid #bd4242;border-radius:16px;padding:24px;margin-bottom:18px}h1{font-size:30px;color:var(--blue);margin:0}h2{font-size:21px;margin:0 0 16px}header p{margin:6px 0 0;color:var(--muted)}a{color:var(--blue);text-decoration:none;font-weight:650}.card{background:#fff;border-radius:14px;padding:22px;margin-bottom:20px;box-shadow:0 4px 18px #233c6810}.preview{padding:12px 16px;background:#fff5df;border:1px solid #eed7a6;border-radius:10px;margin-bottom:20px;color:#89601c;font-size:14px}.toolbar,.sort,.section-head{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.toolbar span{margin-left:auto;color:var(--muted)}input,select{font:inherit;padding:10px 12px;border:1px solid #d9e2ec;border-radius:9px;background:white;color:#21314a}label{font-weight:600}button{background:var(--blue);color:white;border:0;border-radius:9px;padding:12px 20px;font:inherit;font-weight:650;cursor:pointer}button.secondary{background:#edf3fa;color:var(--blue)}button:disabled{opacity:.5;cursor:wait}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.metrics p{margin:0;color:var(--muted)}.metrics strong{display:block;font-size:40px;color:var(--blue);margin:6px 0}.metrics article:nth-child(2) strong{color:var(--green)}small{display:block;color:var(--muted);font-size:13px}.hint{color:var(--muted);font-size:14px;margin:8px 0 14px}.form{max-width:780px;margin:0 auto 20px}.field{margin-bottom:22px}.field label{display:block;margin-bottom:7px}.field input,.field select{width:100%}[hidden]{display:none!important}.guide{max-width:780px;margin:0 auto}.regions{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.region strong{color:var(--blue);font-size:24px}.region p{display:flex;justify-content:space-between;margin:8px 0}.section-head{justify-content:space-between}.table-scroll{overflow:auto;max-height:640px}table{width:100%;min-width:1120px;border-spacing:0}th,td{padding:14px 12px;text-align:right;border-bottom:1px solid #e7edf5;white-space:nowrap}th{position:sticky;top:0;background:#e9f0f8;color:var(--blue);z-index:2}th:first-child,td:first-child{text-align:left}td:nth-child(4){background:#f0f5fc;font-weight:650;color:var(--blue)}td:nth-child(5){color:var(--green)}.tag{padding:4px 8px;border-radius:6px;font-size:13px;background:#fff2d7;color:#916620}.tag.ok{background:#e7f4ed;color:var(--green)}.trend-row{display:grid;grid-template-columns:120px 1fr 180px;align-items:center;gap:18px;margin:16px 0}.track{height:20px;background:#edf2f8;border-radius:5px;overflow:hidden}.fill{height:100%;background:#3479b9;border-radius:5px}.rate-track{height:5px;background:#e8f0ed;margin-top:5px}.rate-fill{height:100%;background:#42966e}.error{color:#b63b3b}.success{color:var(--green)}@media(max-width:1000px){.metrics,.regions{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){main{padding:14px}header{display:block}header a{display:block;margin-top:15px}.metrics,.regions{grid-template-columns:1fr}.trend-row{grid-template-columns:75px 1fr 105px;gap:10px}.metrics strong{font-size:34px}.toolbar span{margin-left:0}}
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="bboss-build" content="20261101-october-final"><meta name="viewport" content="width=device-width,initial-scale=1"><title>大富豪新品铺货提报</title><style>:root{--blue:#174d8c;--green:#216b4d;--muted:#64748b}*{box-sizing:border-box}body{margin:0;background:#f5f7fb;color:#21314a;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif}main{max-width:1580px;margin:0 auto;padding:28px}header{display:flex;justify-content:space-between;align-items:center;gap:18px;background:white;border-top:6px solid #bd4242;border-radius:16px;padding:24px;margin-bottom:18px}h1{font-size:30px;color:var(--blue);margin:0}h2{font-size:21px;margin:0 0 16px}header p{margin:6px 0 0;color:var(--muted)}a{color:var(--blue);text-decoration:none;font-weight:650}.card{background:#fff;border-radius:14px;padding:22px;margin-bottom:20px;box-shadow:0 4px 18px #233c6810}.preview{padding:12px 16px;background:#fff5df;border:1px solid #eed7a6;border-radius:10px;margin-bottom:20px;color:#89601c;font-size:14px}.toolbar,.sort,.section-head{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.toolbar span{margin-left:auto;color:var(--muted)}input,select{font:inherit;padding:10px 12px;border:1px solid #d9e2ec;border-radius:9px;background:white;color:#21314a}label{font-weight:600}button{background:var(--blue);color:white;border:0;border-radius:9px;padding:12px 20px;font:inherit;font-weight:650;cursor:pointer}button.secondary{background:#edf3fa;color:var(--blue)}button:disabled{opacity:.5;cursor:wait}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.metrics p{margin:0;color:var(--muted)}.metrics strong{display:block;font-size:40px;color:var(--blue);margin:6px 0}.metrics article:nth-child(2) strong{color:var(--green)}small{display:block;color:var(--muted);font-size:13px}.hint{color:var(--muted);font-size:14px;margin:8px 0 14px}.form{max-width:780px;margin:0 auto 20px}.field{margin-bottom:22px}.field label{display:block;margin-bottom:7px}.field input,.field select{width:100%}[hidden]{display:none!important}.guide{max-width:780px;margin:0 auto}.regions{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.region strong{color:var(--blue);font-size:24px}.region p{display:flex;justify-content:space-between;margin:8px 0}.section-head{justify-content:space-between}.table-scroll{overflow:auto;max-height:640px}table{width:100%;min-width:1120px;border-spacing:0}th,td{padding:14px 12px;text-align:right;border-bottom:1px solid #e7edf5;white-space:nowrap}th{position:sticky;top:0;background:#e9f0f8;color:var(--blue);z-index:2}th:first-child,td:first-child{text-align:left}td:nth-child(4){background:#f0f5fc;font-weight:650;color:var(--blue)}td:nth-child(5){color:var(--green)}.tag{padding:4px 8px;border-radius:6px;font-size:13px;background:#fff2d7;color:#916620}.tag.ok{background:#e7f4ed;color:var(--green)}.trend-row{display:grid;grid-template-columns:120px 1fr 180px;align-items:center;gap:18px;margin:16px 0}.track{height:20px;background:#edf2f8;border-radius:5px;overflow:hidden}.fill{height:100%;background:#3479b9;border-radius:5px}.rate-track{height:5px;background:#e8f0ed;margin-top:5px}.rate-fill{height:100%;background:#42966e}.error{color:#b63b3b}.success{color:var(--green)}@media(max-width:1000px){.metrics,.regions{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){main{padding:14px}header{display:block}header a{display:block;margin-top:15px}.metrics,.regions{grid-template-columns:1fr}.trend-row{grid-template-columns:75px 1fr 105px;gap:10px}.metrics strong{font-size:34px}.toolbar span{margin-left:0}}
 .product-block{border-top:1px solid #d9e2ec;padding-top:22px;margin-top:22px}.product-block h2{color:#174d8c}.product-block.classic h2{color:#805c1b}</style></head><body>
-<main><header><div><h1>大富豪新品铺货提报</h1><p>更新本月累计新增铺货与目前累计复购。</p></div></header>
-<div class="preview">请核对带出的上次数字后提交。</div>
+<main><header><div><h1>大富豪新品铺货提报</h1><p>核对10月最终铺货与复购数据，暂不收集11月。</p></div></header>
+<div class="preview">选择M2后，自动带出10月上次填写的数字，请核对截至10月31日的最终数。</div>
 <section class="form card">
 <div class="field"><label for="m2">M2</label><select id="m2"><option value="">请选择M2</option><option value="黄新军&许艳">黄新军&许艳</option><option value="谢国峰">谢国峰</option><option value="蔡芳">蔡芳</option><option value="季红州">季红州</option><option value="梅宇飞">梅宇飞</option><option value="高凌峰">高凌峰</option><option value="陈永华">陈永华</option><option value="杭佳琪">杭佳琪</option><option value="茅东标">茅东标</option><option value="是焱彬-姜堰">是焱彬-姜堰</option><option value="是焱彬-靖江">是焱彬-靖江</option><option value="王震-泰兴">王震-泰兴</option><option value="王震-泰州">王震-泰州</option><option value="张雷">张雷</option><option value="费燕锋">费燕锋</option><option value="顾彬">顾彬</option><option value="李海伟">李海伟</option><option value="刘洲">刘洲</option><option value="唐启军">唐启军</option><option value="张旭东">张旭东</option></select></div>
 <input id="month" type="hidden"><input id="asOf" type="hidden">
 <div class="product-block"><h2>雪白听</h2>
 
 
-<div class="field"><label for="dist" data-month-label="新增铺货售点数">10月累计新增铺货售点数</label><input id="dist" type="number" min="0" step="1" inputmode="numeric" required></div>
-<div class="field"><label for="rep">目前累计已复购售点数</label><input id="rep" type="number" min="0" step="1" inputmode="numeric" required><p class="hint">包含6月起所有已铺货售点，不仅是本月新增售点。</p></div></div>
+<div class="field"><label for="dist" data-month-label="新增铺货售点数">10月全月新增铺货售点数</label><input id="dist" type="number" min="0" step="1" inputmode="numeric" required></div>
+<div class="field"><label for="rep">截至10月底累计已复购售点数</label><input id="rep" type="number" min="0" step="1" inputmode="numeric" required><p class="hint">包含6月起所有已铺货售点，统计截至10月31日，不仅是10月新增售点。</p></div></div>
 <div class="product-block classic"><h2>经典听</h2><p id="classicScope" class="hint"></p><p id="classicPrefillNote" class="hint"></p>
 
-<div class="field"><label for="classicNew" data-month-label="新增铺货售点数">10月累计新增铺货售点数</label><input id="classicNew" type="number" min="0" step="1" inputmode="numeric" required></div>
-<div class="field"><label for="classicRep">目前累计已复购售点数</label><input id="classicRep" type="number" min="0" step="1" inputmode="numeric" required><p class="hint">包含9月起所有已铺货售点，不仅是本月新增售点。</p></div></div>
-<p class="hint">单位：家。同一产品同一售点只计一次。本月新增填累计数，实际为0请填0。</p><div id="last" class="hint"></div>
+<div class="field"><label for="classicNew" data-month-label="新增铺货售点数">10月全月新增铺货售点数</label><input id="classicNew" type="number" min="0" step="1" inputmode="numeric" required></div>
+<div class="field"><label for="classicRep">截至10月底累计已复购售点数</label><input id="classicRep" type="number" min="0" step="1" inputmode="numeric" required><p class="hint">包含9月起所有已铺货售点，统计截至10月31日，不仅是10月新增售点。</p></div></div>
+<p class="hint">单位：家。同一产品同一售点只计一次。10月新增填写全月总数，实际为0请填0。</p><div id="last" class="hint"></div>
 <button id="refreshLatest" type="button" class="secondary">重新读取最新数字</button> <button disabled id="submit" type="button">一次保存两个新品</button><p id="msg" role="status"></p></section>
-</main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>(()=>{
+</main><script>/* Public reporting: no login SDK, no raw table access, no automatic write retries. */
+(()=>{
+  'use strict';
   const el=id=>document.getElementById(id),ids=['dist','rep','classicNew','classicRep'];
-  const client=supabase.createClient('https://hjuemoaxwotvgvppuits.supabase.co','sb_publishable_kLCQcltuyPsjoM5udpUu4A_8iw1R-oD',{
-    auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
-  });
-  let context=null,busy=false,sequence=0;
+  const endpoint='https://hjuemoaxwotvgvppuits.supabase.co/rest/v1/rpc/';
+  const apiKey='sb_publishable_kLCQcltuyPsjoM5udpUu4A_8iw1R-oD';
+  let context=null,shownM2='',sequence=0,controller=null,loading=false,saving=false,dirty=false,failed=false,uncertain=false,lastRead=0;
+  const offline=()=>typeof navigator!=='undefined'&&navigator.onLine===false;
   function status(message,error=false){el('msg').textContent=message;el('msg').className=error?'error':'success'}
-  function fill(data){
-    context=data;el('m2').value=data.m2;el('month').value=data.month;el('asOf').value=data.as_of;
-    ids.forEach(id=>el(id).value=data.values[id]??'');
-    document.querySelectorAll('[data-month-label]').forEach(l=>l.textContent=Number(data.month.slice(5))+'月累计'+l.dataset.monthLabel);
-    el('classicScope').textContent='按当前所选区域分别提报。';
-    el('classicPrefillNote').textContent='已带出上次记录；实际为0请填0。';
-    el('last').textContent='已带出当前月份上次记录；实际为0请填0。';
-    document.querySelector('.preview').textContent='选择M2后核对历史数字，一次提交两个新品。';el('submit').disabled=false;
+  function controls(){
+    el('submit').disabled=saving||loading||!context||context.m2!==el('m2').value||offline()||uncertain;
+    el('refreshLatest').disabled=saving||loading||!el('m2').value;
+    el('m2').disabled=saving;
+    ids.forEach(id=>{el(id).readOnly=saving||loading});
   }
-  async function load(){
-    const request=++sequence,m2=el('m2').value;
-    context=null;el('submit').disabled=true;
+  function clearForM2(m2){
+    context=null;shownM2=m2;dirty=false;uncertain=false;failed=false;
     ids.forEach(id=>el(id).value='');
     ['classicScope','classicPrefillNote','last'].forEach(id=>el(id).textContent='');
-    if(!m2){status('请选择M2，自动带出历史数字。');return}
-    status('正在读取历史数字…');
-    try{
-      const result=await client.rpc('xuebai_public_prefill',{p_m2:m2});
-      if(request!==sequence||m2!==el('m2').value)return;
-      if(result.error)throw result.error;
-      if(!result.data||result.data.m2!==m2)throw new Error('返回的M2不一致，请重新读取。');
-      fill(result.data);status('历史数字已带出，请核对后提交。');
-    }catch(e){if(request===sequence)status('读取失败：'+e.message,true)}
   }
-  el('m2').addEventListener('change',()=>{if(!busy)load()});
-  el('refreshLatest').addEventListener('click',async()=>{
-    if(busy)return;
-    if(context&&!window.confirm('重新读取将替换尚未提交的数字，继续？'))return;
-    busy=true;try{await load()}catch(e){status('读取失败，请稍后重试。',true)}finally{busy=false}
-  });
-  el('submit').addEventListener('click',async()=>{
-    if(busy||!context||context.m2!==el('m2').value)return;
-    if(ids.some(id=>el(id).value===''))return status('请填写全部4项数字，实际为0请填0。',true);
-    const values=Object.fromEntries(ids.map(id=>[id,Number(el(id).value)]));
-    if(Object.values(values).some(n=>!Number.isSafeInteger(n)||n<0||n>2147483647))return status('请填写有效的非负整数。',true);
-    busy=true;el('submit').disabled=true;el('m2').disabled=true;
+  function fill(data){
+    context=data;shownM2=data.m2;dirty=false;uncertain=false;failed=false;lastRead=Date.now();
+    el('month').value=data.month;el('asOf').value=data.as_of;
+    ids.forEach(id=>el(id).value=data.values[id]??'');
+    document.querySelectorAll('[data-month-label]').forEach(l=>l.textContent='10月全月'+l.dataset.monthLabel);
+    el('classicScope').textContent='按当前所选区域分别提报。';
+    el('classicPrefillNote').textContent='已带出上次记录；实际为0请填0。';
+    el('last').textContent='已带出10月上次填写的数字，请核对截至10月31日的最终数；实际为0请填0。';
+    document.querySelector('.preview').textContent='当前仅核对10月最终数，暂不收集11月。';
+  }
+  function valid(data,m2){return data&&data.m2===m2&&data.values&&typeof data.values==='object'&&typeof data.version==='string'&&data.version&&data.month==='2026-10'}
+  async function rpc(name,args,timeoutMs,request){
+    if(!['xuebai_public_prefill','xuebai_public_submit'].includes(name))throw Error('接口无效');
+    const abort=new AbortController();controller=abort;let timedOut=false;
+    const timer=setTimeout(()=>{timedOut=true;abort.abort()},timeoutMs);
     try{
-      const args={p_m2:context.m2,p_values:values,p_expected_version:context.version,p_allow_decrease:false};
-      let result=await client.rpc('xuebai_public_submit',args);
-      if(result.error?.message.includes('DECREASE_CONFIRM_REQUIRED')){
-        if(!window.confirm('部分数字低于之前记录，确认以本次数值更新？'))return;
-        result=await client.rpc('xuebai_public_submit',{...args,p_allow_decrease:true});
+      const response=await fetch(endpoint+name,{method:'POST',headers:{apikey:apiKey,'Content-Type':'application/json'},body:JSON.stringify(args),cache:'no-store',credentials:'omit',signal:abort.signal});
+      let data;try{data=await response.json()}catch(e){const error=Error('服务器返回格式异常');error.retryable=true;throw error}
+      if(!response.ok){const error=Error(data?.message||'服务暂时不可用（'+response.status+'）');error.retryable=response.status===408||response.status===429||response.status>=500;error.httpStatus=response.status;throw error}
+      return data;
+    }catch(error){
+      if(timedOut){const e=Error('网络读取超时');e.retryable=true;throw e}
+      if(request!==sequence)throw error;
+      if(error.name==='TypeError'||error.name==='AbortError')error.retryable=true;
+      throw error;
+    }finally{clearTimeout(timer);if(controller===abort)controller=null}
+  }
+  async function load({automatic=false}={}){
+    if(saving||automatic&&loading)return;
+    const m2=el('m2').value,request=++sequence;
+    controller?.abort();
+    if(shownM2!==m2)clearForM2(m2);
+    if(automatic&&dirty){status('已保留尚未提交的数字，请点击“重新读取最新数字”核对。',true);controls();return}
+    context=null;loading=true;controls();
+    if(!m2){loading=false;status('请选择M2，自动带出历史数字。');controls();return}
+    try{
+      if(offline())throw Error('当前没有网络');
+      for(let attempt=1;attempt<=3;attempt++){
+        if(request!==sequence||m2!==el('m2').value)return;
+        status(attempt===1?'正在读取历史数字…':'网络较慢，正在重试（'+attempt+'/3）…');
+        try{
+          const data=await rpc('xuebai_public_prefill',{p_m2:m2},15000,request);
+          if(request!==sequence||m2!==el('m2').value)return;
+          if(!valid(data,m2))throw Error('尚未启用10月最终核对，或返回记录不完整；为避免误存11月，已停止提交，请联系管理员。');
+          fill(data);status('历史数字已带出，请核对后提交。');return;
+        }catch(error){
+          if(request!==sequence)return;
+          if(!error.retryable||attempt===3||offline())throw error;
+          await new Promise(resolve=>setTimeout(resolve,attempt*800));
+        }
       }
-      if(result.error)throw result.error;
-      fill(result.data);status('提交成功，两个新品数据均已保存。');
-    }catch(e){status('提交失败：'+e.message,true)}finally{busy=false;el('m2').disabled=false;el('submit').disabled=!context}
+    }catch(error){
+      if(request!==sequence)return;
+      failed=true;context=null;
+      const retained=ids.some(id=>el(id).value!=='');
+      status((retained?'未能获取最新数字，已保留当前填写内容；请重新读取并核对后提交。':'历史数字暂未读取成功；请检查网络后重试，空白不代表0。')+' '+(offline()?'当前处于离线状态。':error.message),true);
+    }finally{if(request===sequence){loading=false;controls()}}
+  }
+  el('m2').addEventListener('change',()=>load());
+  ids.forEach(id=>el(id).addEventListener('input',()=>{dirty=true}));
+  el('refreshLatest').addEventListener('click',async()=>{
+    if(saving||loading)return;
+    if(dirty&&!window.confirm('重新读取将替换尚未提交的数字，继续？'))return;
+    dirty=false;await load();
   });
-  load().catch(()=>status('读取失败，请稍后重试。',true));
+  function reconnect(){
+    if(saving||loading||!el('m2').value)return;
+    if(dirty){if(failed||!context||Date.now()-lastRead>60000)status('已保留尚未提交的数字；如需核对最新记录，请点击“重新读取最新数字”。',true);controls();return}
+    if(failed||!context||Date.now()-lastRead>60000)load({automatic:true});else controls();
+  }
+  window.addEventListener('online',reconnect);
+  window.addEventListener('pageshow',event=>{if(event.persisted)reconnect()});
+  window.addEventListener('offline',()=>{status('网络已断开，当前数字已保留；联网后请核对再提交。',true);controls()});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reconnect()});
+  el('submit').addEventListener('click',async()=>{
+    if(saving||loading||!context||uncertain||context.m2!==el('m2').value)return;
+    if(offline()){status('当前没有网络，填写内容已保留，请联网后再提交。',true);controls();return}
+    if(ids.some(id=>el(id).value==='')){status('请填写全部4项数字，实际为0请填0。',true);return}
+    const values=Object.fromEntries(ids.map(id=>[id,Number(el(id).value)]));
+    if(Object.values(values).some(n=>!Number.isSafeInteger(n)||n<0||n>2147483647)){status('请填写有效的非负整数。',true);return}
+    saving=true;controls();status('正在提交，请勿重复点击…');
+    const request=sequence,args={p_m2:context.m2,p_values:values,p_expected_version:context.version,p_allow_decrease:false};
+    try{
+      let data;
+      try{data=await rpc('xuebai_public_submit',args,25000,request)}catch(error){
+        if(!error.message.includes('DECREASE_CONFIRM_REQUIRED'))throw error;
+        if(!window.confirm('部分数字低于之前记录，确认以本次数值更新？')){status('已取消提交，填写内容已保留。');return}
+        data=await rpc('xuebai_public_submit',{...args,p_allow_decrease:true},25000,request);
+      }
+      if(!valid(data,args.p_m2)){const error=Error('未收到完整的保存确认');error.retryable=true;throw error}
+      fill(data);status('提交成功，两个新品的10月最终数均已保存。');
+    }catch(error){
+      // A lost response may mean the write succeeded. Never automatically replay it.
+      uncertain=true;context=null;failed=true;dirty=true;
+      status((error.retryable?'尚未确认是否保存成功，请先重新读取核对，不要重复提交。':'提交未获确认：'+error.message+'。请重新读取核对。')+' 填写内容已保留。',true);
+    }finally{saving=false;controls()}
+  });
+  load();
 })();
 </script></body></html>
