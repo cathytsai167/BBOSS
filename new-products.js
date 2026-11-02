@@ -8,6 +8,15 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const date=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const monthsTo=end=>{let list=[];for(let m='2026-10';m<=end;){list.push(m);let[y,n]=m.split('-').map(Number);if(++n>12){n=1;y++}m=`${y}-${String(n).padStart(2,'0')}`}return list};
 function cycleStart(now=new Date()){const d=new Date(now.getTime()+8*3600000);d.setUTCDate(d.getUTCDate()-(d.getUTCDay()+2)%7);d.setUTCHours(12,0,0,0);if(+d>+now+8*3600000)d.setUTCDate(d.getUTCDate()-7);return +d-8*3600000}
+// October final confirmation is distinct from its October 31 data cutoff.
+const octoberFinalStart=Date.parse('2026-11-01T00:00:00+08:00');
+function submissionMeta(month,record,complete){
+ const submitted_at=complete?record?.created_at:null,time=Date.parse(submitted_at);
+ return {submitted_at,final_submitted:month==='2026-10'&&!!complete&&Number.isFinite(time)&&time>=octoberFinalStart};
+}
+function submittedTime(value){
+ const time=Date.parse(value);return Number.isFinite(time)?new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(new Date(time)):'—';
+}
 let state=null,product='snow',region='',rerender=null;
 const regionRows=rows=>rows.filter(r=>!region||r.m3===region);
 const regionLabel=()=>region||'苏东 TTL';
@@ -34,7 +43,7 @@ function distributionRows(which,month){
    const complete=base!=null&&reports.every(r=>r?.classic_new!=null);
    const total=base==null?null:base+sum(reports.map(r=>r?.classic_new??0));
    const known=reports.filter(r=>r?.classic_repurchase!=null).at(-1);
-   return {...b,baseline:base,total,rep:current?.classic_repurchase??known?.classic_repurchase??null,new:current?.classic_new??null,current:current?.classic_new!=null,updated:month===date().slice(0,7)&&current?.classic_new!=null&&new Date(current.created_at)>=cycleStart(),as_of:known?.report_date??'2026-09-30',provisional:!complete,source:complete?'已提报':'含历史已知数，缺报待补'};
+   return {...b,...submissionMeta(month,current,current?.classic_new!=null&&current?.classic_repurchase!=null),baseline:base,total,rep:current?.classic_repurchase??known?.classic_repurchase??null,new:current?.classic_new??null,current:current?.classic_new!=null,updated:month===date().slice(0,7)&&current?.classic_new!=null&&new Date(current.created_at)>=cycleStart(),as_of:known?.report_date??'2026-09-30',provisional:!complete,source:complete?'已提报':'含历史已知数，缺报待补'};
   });
  }
  return names.map(b=>{
@@ -50,7 +59,7 @@ function distributionRows(which,month){
   const reports=monthsTo(month).map(m=>monthly(b.name,m)),current=reports.at(-1),known=reports.filter(Boolean).at(-1);
   const total=bd==null?null:bd+sum(reports.map(r=>r?.monthly_distribution??0)),rep=current?.cumulative_repurchase??known?.cumulative_repurchase??br;
   const complete=!!base&&reports.every(r=>r?.monthly_distribution!=null);
-  return {...b,baseline:bd,total,rep,new:current?.monthly_distribution??null,current:!!current,updated:month===date().slice(0,7)&&!!current&&new Date(current.created_at)>=cycleStart(),as_of:current?.report_date??known?.report_date??(base?'2026-09-30':old?.created_at?.slice(0,10)),provisional:!complete,source:complete?'已提报':'含历史已知数，缺报待补'};
+  return {...b,...submissionMeta(month,current,current?.monthly_distribution!=null&&current?.cumulative_repurchase!=null),baseline:bd,total,rep,new:current?.monthly_distribution??null,current:!!current,updated:month===date().slice(0,7)&&!!current&&new Date(current.created_at)>=cycleStart(),as_of:current?.report_date??known?.report_date??(base?'2026-09-30':old?.created_at?.slice(0,10)),provisional:!complete,source:complete?'已提报':'含历史已知数，缺报待补'};
  });
 }
 function distributionTotals(rows){
@@ -101,14 +110,17 @@ function setupDistribution(){
   $('total').textContent=fmt(t.dist);$('repTotal').textContent=fmt(t.rep);$('repRate').textContent=pct(t.rate);$('newTotal').textContent=fmt(t.added);$('newLabel').textContent=month==='2026-07'?'6–7月铺货售点':Number(month.slice(5))+'月累计新增铺货';
   $('totalNote').textContent=t.provisional?'含历史已知数；未提报月份新增不按0确认。':'按所选月份累计，售点不跨产品去重。';
   $('repNote').textContent=product==='classic'&&month==='2026-09'?'9月底经典听复购未收集。':`复购率按铺货及复购都有数字的 ${t.coverage}/${rows.length} 个M2计算。`;
-  $('coverage').textContent=`${rows.filter(r=>r.current).length}/${rows.length} 个M2本月已提报 · 每周五12:00切换待更新`;
+  $('coverage').textContent=month==='2026-10'?`${rows.filter(r=>r.final_submitted).length}/${rows.length} 个M2已提交10月最终核对 · 11月1日起重新提交计入`:`${rows.filter(r=>r.current).length}/${rows.length} 个M2本月已提报 · 每周五12:00切换待更新`;
+  if($('submissionStatusHead'))$('submissionStatusHead').textContent=month==='2026-10'?'10月最终核对':'提报状态';
+  if($('submissionTimeHead'))$('submissionTimeHead').textContent=month>='2026-10'?'最新提报时间（北京时间）':'历史记录日期';
+  if($('submissionNote'))$('submissionNote').textContent=month==='2026-10'?'10月最终核对：11月1日起重新提交的显示实际提报时间，尚未重新提交的显示待提交；旧数字仍保留。':'每周五12:00（北京时间）切换为待更新。未提报不按0处理；王震、是焱彬按各区域分别统计。6–7月铺货保留合并口径，不拆单月。';
   $('regions').style?.setProperty('--region-count',region?'1':'5');
   $('regions').innerHTML=M3.filter(m=>(!region||m===region)&&(!$('filter').value||m===$('filter').value)).map(m=>{const rs=rows.filter(r=>r.m3===m),s=distributionTotals(rs);return `<article class="card"><h3>${m}</h3><p>累计铺货 <b>${fmt(s.dist)}</b> 家</p><p>累计复购 <b>${fmt(s.rep)}</b> 家</p><p>区域售点复购率 <b>${pct(s.rate)}</b></p><div class="rate-track"><div class="rate-fill" style="background:#27815b;width:${Math.min(100,Math.max(0,(s.rate||0)*100))}%"></div></div><p>本期新增 <b>${fmt(s.added)}</b> 家</p></article>`}).join('');
   rows=rows.filter(r=>!$('m2Filter').value||r.m3===$('m2Filter').value);const key=$('sortBy').value,dir=$('sortDir').value==='asc'?1:-1,val=r=>key==='rate'?(r.total&&r.rep!=null?r.rep/r.total:null):r[key];rows.sort(key==='default'?(a,b)=>M3.indexOf(a.m3)-M3.indexOf(b.m3): (a,b)=>val(a)==null?val(b)==null?0:1:val(b)==null?-1:dir*(val(a)-val(b)));
   const maxDist=Math.max(1,...rows.map(r=>r.total||0)),maxRep=Math.max(1,...rows.map(r=>r.rep||0));
   const bar=(v,max,kind)=>v==null?'—':`<span class="cell-value">${fmt(v)}</span><div class="cell-bar"><div class="cell-fill ${kind}" style="width:${Math.max(0,Math.min(100,v/max*100))}%"></div></div>`;
   const rateBar=r=>r.total&&r.rep!=null?`<span class="cell-value">${pct(r.rep/r.total)}</span><div class="cell-bar rate-bar"><div class="cell-fill rep" style="width:${Math.max(0,Math.min(100,r.rep/r.total*100))}%"></div></div>`:'—';
-  $('rows').innerHTML=rows.map(r=>`<tr><td><span class="m3-chip">${esc(r.m3)}</span></td><td>${esc(r.name)}</td><td>${fmt(r.baseline)}</td><td><span class="new-chip">${fmt(r.new)}</span></td><td class="dist-total">${bar(r.total,maxDist,'dist')}</td><td class="rep-total">${bar(r.rep,maxRep,'rep')}</td><td>${rateBar(r)}</td><td><span class="tag ${r.updated?'ok':''}">${month<'2026-10'?r.source:month===date().slice(0,7)?r.updated?'已更新':'待更新':r.current?'已提报':'未提报'}</span>${r.provisional?'<small>缺报待补</small>':''}</td><td>${r.as_of||'—'}</td></tr>`).join('')||'<tr><td colspan="9">暂无区域铺货数据</td></tr>';
+  $('rows').innerHTML=rows.map(r=>`<tr><td><span class="m3-chip">${esc(r.m3)}</span></td><td>${esc(r.name)}</td><td>${fmt(r.baseline)}</td><td><span class="new-chip">${fmt(r.new)}</span></td><td class="dist-total">${bar(r.total,maxDist,'dist')}</td><td class="rep-total">${bar(r.rep,maxRep,'rep')}</td><td>${rateBar(r)}</td><td><span class="tag ${(month==='2026-10'?r.final_submitted:r.updated)?'ok':''}">${month==='2026-10'?(r.final_submitted?'已提交':'待提交'):month<'2026-10'?r.source:month===date().slice(0,7)?r.updated?'已更新':'待更新':r.current?'已提报':'未提报'}</span>${r.provisional?'<small>缺报待补</small>':''}</td><td>${month==='2026-10'?(r.final_submitted?submittedTime(r.submitted_at):'待提交'):month>='2026-10'?submittedTime(r.submitted_at):r.as_of||'—'}</td></tr>`).join('')||'<tr><td colspan="9">暂无区域铺货数据</td></tr>';
   if($('distributionFoot')){const ft=distributionTotals(rows);$('distributionFoot').innerHTML=rows.length?`<tr><td>合计</td><td>${rows.length}个M2</td><td>${fmt(aggregate(rows,'baseline'))}</td><td>${fmt(ft.added)}</td><td class="dist-total">${fmt(ft.dist)}</td><td class="rep-total">${fmt(ft.rep)}</td><td>${pct(ft.rate)}</td><td colspan="2">复购率按有完整配对数字的M2加权计算</td></tr>`:''}
  };
  rerender=()=>{options();render()};$('product').onchange=()=>{product=$('product').value;options();render()};['month','filter','m2Filter','sortBy','sortDir'].forEach(id=>$(id).onchange=render);options();render();
